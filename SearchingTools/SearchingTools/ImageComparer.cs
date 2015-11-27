@@ -5,6 +5,8 @@ namespace SearchingTools
 {
 	internal static class ImageComparer
 	{
+		private static double power = 2;
+
 		/// <summary>
 		/// Подсчитывает среднеквадратичное отклонение по каждому компоненту RGB.
 		/// </summary>
@@ -15,7 +17,7 @@ namespace SearchingTools
 		public static SimpleColor CalculateDifference(SimpleColor[][] image, Point imageStart, 
 			SimpleColor[][] template, SimpleColor reservedColor)
 		{
-			int red = 0, green = 0, blue = 0;
+			double red = 0, green = 0, blue = 0;
 			int uncounted = 0;
 			for (int dx = 0; dx < template.GetLength(0); ++dx)
 				for (int dy = 0; dy < template[0].GetLength(0); ++dy)
@@ -27,32 +29,36 @@ namespace SearchingTools
 						++uncounted;
 						continue;
 					}
-					var dR = (imagePointColor.R - templatePointColor.R);
-					var dG = (imagePointColor.G - templatePointColor.G);
-					var dB = (imagePointColor.B - templatePointColor.B);
-					red += dR * dR;
-					green += dG * dG;
-					blue += dB * dB;
+					var dR = Math.Abs(imagePointColor.R - templatePointColor.R);
+					var dG = Math.Abs(imagePointColor.G - templatePointColor.G);
+					var dB = Math.Abs(imagePointColor.B - templatePointColor.B);
+					red += Math.Pow(dR, power);
+					green += Math.Pow(dG, power);
+					blue += Math.Pow(dB, power);
 				}
 			int totalPoints = template.GetLength(0) * template[0].GetLength(0) - uncounted;
 			return GetResultSimpleColor(red, green, blue, totalPoints);
 		}
 
-		private static SimpleColor GetResultSimpleColor(double red, double green, double blue, int totalPoints)
+		private static SimpleColor GetResultSimpleColor(double red, double green, double blue, double totalPoints)
 		{
+			red = Math.Pow(red, 1.0 / power);
+			green = Math.Pow(green, 1.0 / power);
+			blue = Math.Pow(blue, 1.0 / power);
+			totalPoints = Math.Pow(totalPoints, 1.0 / power);
 			red /= totalPoints;
 			green /= totalPoints;
 			blue /= totalPoints;
-			return SimpleColor.FromRgb(NormalizeSimpleColorComponent(red), NormalizeSimpleColorComponent(green), NormalizeSimpleColorComponent(blue));
+			return SimpleColor.FromRgb(NormalizeColorComponent(red), NormalizeColorComponent(green), NormalizeColorComponent(blue));
 		}
 
-		private static byte NormalizeSimpleColorComponent(double SimpleColorComponent)
+		private static byte NormalizeColorComponent(double simpleColorComponent)
 		{
-			SimpleColorComponent = Math.Sqrt(SimpleColorComponent);
-			SimpleColorComponent = Math.Round(SimpleColorComponent);
-			SimpleColorComponent = Math.Max(SimpleColorComponent, 0);
-			SimpleColorComponent = Math.Min(SimpleColorComponent, byte.MaxValue);
-			return (byte)SimpleColorComponent;
+			//simpleColorComponent = Math.Pow(simpleColorComponent, 1.0 / 3);
+			simpleColorComponent = Math.Round(simpleColorComponent);
+			simpleColorComponent = Math.Max(simpleColorComponent, 0);
+			simpleColorComponent = Math.Min(simpleColorComponent, byte.MaxValue);
+			return (byte)simpleColorComponent;
 		}
 
 		/// <summary>

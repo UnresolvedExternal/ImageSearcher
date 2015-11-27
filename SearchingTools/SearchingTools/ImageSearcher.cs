@@ -14,6 +14,8 @@ namespace SearchingTools
 		private static readonly int smallPictureHeight = 2;
 
 		private SimpleColor[][] template;
+		public int TemplateWidth { get { return template.Length; } }
+		public int TemplateHeight { get { return template[0].Length; } }
 
 		// Part of template, witch is using as a first filter (in order to increase performance)
 		private SimpleColor[][] smallPictureTemplate;
@@ -81,6 +83,7 @@ namespace SearchingTools
 		public IEnumerable<Point> GetPositions(SimpleColor[][] source)
 		{
 			var smallPicturePositions = GetSmallPicturePositions(source);
+			var hm = smallPicturePositions.Count(); //DEBUG !!!
 			foreach (var pos in smallPicturePositions)
 				if (ImageComparer.AreEqual(
 					source,
@@ -108,16 +111,15 @@ namespace SearchingTools
 				var name = Path.GetFileName(filename);
 				var number = Regex.Match(name, @"\d+");
 				int value = int.Parse(number.Value);
-				Learn(source, value);
+				Learn(ImageConverter.ToMatrix(source), value);
 			}
 		}
 
 		/// <summary>
 		/// Updates maximal admissible differences.
 		/// </summary>
-		private void Learn(Bitmap source, int elementsCount)
+		public void Learn(SimpleColor[][] sourceMatrix, int elementsCount)
 		{
-			var sourceMatrix = SearchingTools.ImageConverter.ToMatrix(source);
 			SimpleColor[] minValues = 
 				Enumerable.Repeat(SimpleColor.FromRgb(byte.MaxValue, byte.MaxValue, byte.MaxValue), elementsCount).ToArray();
 			Point[] positions = new Point[elementsCount];
