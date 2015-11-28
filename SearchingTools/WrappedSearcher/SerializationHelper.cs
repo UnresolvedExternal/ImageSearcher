@@ -13,8 +13,6 @@ namespace SearchingTools
 		private static DataContractJsonSerializer formatter =
 			new DataContractJsonSerializer(typeof(BitmapSearcher));
 
-		private static Encoding encoding = Encoding.UTF8;
-
 		public static void Serialize(BitmapSearcher obj, Stream output)
 		{
 			using (var memory = new MemoryStream())
