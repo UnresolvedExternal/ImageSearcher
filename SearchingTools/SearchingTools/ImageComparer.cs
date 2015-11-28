@@ -5,7 +5,7 @@ namespace SearchingTools
 {
 	internal static class ImageComparer
 	{
-		private static double power = 2;
+		//private static double power = 2;
 
 		/// <summary>
 		/// Подсчитывает среднеквадратичное отклонение по каждому компоненту RGB.
@@ -29,12 +29,20 @@ namespace SearchingTools
 						++uncounted;
 						continue;
 					}
+					var dR = imagePointColor.R - templatePointColor.R;
+					var dG = imagePointColor.G - templatePointColor.G;
+					var dB = imagePointColor.B - templatePointColor.B;
+					red += dR * dR;
+					green += dG * dG;
+					blue += dB * dB;
+					/*
 					var dR = Math.Abs(imagePointColor.R - templatePointColor.R);
 					var dG = Math.Abs(imagePointColor.G - templatePointColor.G);
 					var dB = Math.Abs(imagePointColor.B - templatePointColor.B);
 					red += Math.Pow(dR, power);
 					green += Math.Pow(dG, power);
 					blue += Math.Pow(dB, power);
+					 * */
 				}
 			int totalPoints = template.GetLength(0) * template[0].GetLength(0) - uncounted;
 			return GetResultSimpleColor(red, green, blue, totalPoints);
@@ -42,10 +50,10 @@ namespace SearchingTools
 
 		private static SimpleColor GetResultSimpleColor(double red, double green, double blue, double totalPoints)
 		{
-			red = Math.Pow(red, 1.0 / power);
-			green = Math.Pow(green, 1.0 / power);
-			blue = Math.Pow(blue, 1.0 / power);
-			totalPoints = Math.Pow(totalPoints, 1.0 / power);
+			red = Math.Sqrt(red);
+			green = Math.Sqrt(green);
+			blue = Math.Sqrt(blue);
+			totalPoints = Math.Sqrt(totalPoints);
 			red /= totalPoints;
 			green /= totalPoints;
 			blue /= totalPoints;

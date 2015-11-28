@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // Управление общими сведениями о сборке осуществляется с помощью 
 // набора атрибутов. Измените значения этих атрибутов, чтобы изменить сведения,
 // связанные со сборкой.
-[assembly: AssemblyTitle("WrappedSearcher")]
+[assembly: AssemblyTitle("SearchingTools")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Feniks")]
-[assembly: AssemblyProduct("WrappedSearcher")]
+[assembly: AssemblyProduct("SearchingTools")]
 [assembly: AssemblyCopyright("Copyright © Feniks 2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

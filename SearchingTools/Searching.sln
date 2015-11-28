@@ -5,7 +5,7 @@ VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SearchingTools", "SearchingTools\SearchingTools.csproj", "{A86B60A2-6C0C-4720-B34A-36D6F5F7CEBC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WrappedSearcher", "WrappedSearcher\WrappedSearcher.csproj", "{D868685A-E928-4F44-87F0-EDC2BDC716C9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitmapSearcher", "WrappedSearcher\BitmapSearcher.csproj", "{D868685A-E928-4F44-87F0-EDC2BDC716C9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

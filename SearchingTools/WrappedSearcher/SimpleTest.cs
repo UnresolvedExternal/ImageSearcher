@@ -1,12 +1,12 @@
 ﻿using NUnit.Framework;
-using System.IO;
-using System.Text.RegularExpressions;
 using System;
-using System.Drawing;
-using System.Linq;
 using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
 
-namespace WrappedSearcher
+namespace SearchingTools
 {
 	[TestFixture]
 	class SimpleTest
@@ -23,10 +23,10 @@ namespace WrappedSearcher
 			AnswerFolder = Path.Combine(Environment.CurrentDirectory, @"Answer");
 		}
 
-		private WrappedSearcher CreateAndLearnSearcher(Action<WrappedSearcher> afterTune = null)
+		private BitmapSearcher CreateAndLearnSearcher(Action<BitmapSearcher> afterTune = null)
 		{
 			var template = Image.FromFile(Path.Combine(LearnFolder, "template.bmp")) as Bitmap;
-			var g = new WrappedSearcher(template);
+			var g = new BitmapSearcher(template);
 			Assert.AreEqual(template.Size, g.TemplateSize);
 			foreach (var filename in Directory.EnumerateFiles(LearnFolder).Where(f => !f.EndsWith("template.bmp")))
 			{
@@ -48,7 +48,7 @@ namespace WrappedSearcher
 			}
 		}
 
-		private void MarkItems(WrappedSearcher g, Size templateSize)
+		private void MarkItems(BitmapSearcher g, Size templateSize)
 		{
 			foreach (var filename in Directory.EnumerateFiles(QuestionFolder))
 			{
@@ -72,10 +72,11 @@ namespace WrappedSearcher
 			using (var fs = new FileStream(Path.Combine(AnswerFolder, "saves.txt"), FileMode.Create))
 			{
 				g.Save(fs);
+				fs.WriteByte(15);
 			}
 			using (var fs = new FileStream(Path.Combine(AnswerFolder, "saves.txt"), FileMode.Open))
 			{
-				var g2 = WrappedSearcher.Load(fs);
+				var g2 = BitmapSearcher.Load(fs);
 				MarkItems(g2, g2.TemplateSize);
 			}
 		}
@@ -93,6 +94,20 @@ namespace WrappedSearcher
 						t.Flush();
 					});
 			}
+		}
+
+		[Test]
+		public async void Crazy()
+		{
+			var bmp = Image.FromFile(Path.Combine(AnswerFolder, "A13.bmp")) as Bitmap;
+			bmp.UnlockBits(
+			bmp.LockBits(new Rectangle(new Point(0, 0), bmp.Size), 
+				System.Drawing.Imaging.ImageLockMode.ReadWrite, bmp.PixelFormat)
+			);
+			bmp.SetPixel(bmp.Width - 1, bmp.Height - 1, Color.Red);
+			bmp.RotateFlip(RotateFlipType.Rotate90FlipY);
+			System.Threading.Thread.Sleep(1000);
+			bmp.Save(Path.Combine(AnswerFolder, "A13(2).bmp"));
 		}
 	}
 }

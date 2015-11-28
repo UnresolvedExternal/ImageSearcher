@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Newtonsoft.Json.Serialization;
+﻿using System.IO;
+using System.IO.Compression;
 using System.Runtime.Serialization.Json;
+using System.Text;
 
-namespace WrappedSearcher
+namespace SearchingTools
 {
 	/// <summary>
 	/// При неудачной сериализации восстанавливает состояние потока
@@ -15,29 +11,32 @@ namespace WrappedSearcher
 	internal static class SerializationHelper
 	{
 		private static DataContractJsonSerializer formatter =
-			new DataContractJsonSerializer(typeof(WrappedSearcher));
+			new DataContractJsonSerializer(typeof(BitmapSearcher));
 
-		public static void Serialize(WrappedSearcher obj, Stream output)
+		private static Encoding encoding = Encoding.UTF8;
+
+		public static void Serialize(BitmapSearcher obj, Stream output)
 		{
-			var memory = new MemoryStream();
-			try 
+			using (var memory = new MemoryStream())
 			{
 				formatter.WriteObject(memory, obj);
-				memory.WriteTo(output);
-			} 
-			catch
-			{
-				throw;
+				var bytes = memory.GetBuffer();
+				var size = memory.Length;
+				using (var zip = new GZipStream(output, CompressionLevel.Fastest, true))
+				{
+					zip.Write(bytes, 0, (int)size);
+				}
 			}
 		}
 
-		public static WrappedSearcher Deserialize(Stream input)
+		public static BitmapSearcher Deserialize(Stream input)
 		{
 			var oldPosition = input.Position;
-			WrappedSearcher result;
+			BitmapSearcher result;
 			try
 			{
-				result = (WrappedSearcher)formatter.ReadObject(input);
+				using (var zip = new GZipStream(input, CompressionMode.Decompress, true))
+					result = (BitmapSearcher)formatter.ReadObject(new BufferedStream(zip));
 			}
 			catch
 			{

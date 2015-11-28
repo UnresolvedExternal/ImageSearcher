@@ -3,23 +3,22 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
-using System;
-using Converter = SearchingTools.ImageConverter;
 using System.Runtime.Serialization;
+using Converter = SearchingTools.ImageConverter;
 
-namespace WrappedSearcher
+namespace SearchingTools
 {
 	/// <summary>
 	/// Позволяет искать соответствия между изображением Bitmap и
 	/// некоторым постоянным шаблоном.
 	/// </summary>
 	[DataContract]
-	public sealed class WrappedSearcher
+	public sealed class BitmapSearcher
     {
 		[DataMember]
 		private ImageSearcher searcher;
 
-		public WrappedSearcher(Bitmap template)
+		public BitmapSearcher(Bitmap template)
 		{
 			searcher = new ImageSearcher(Converter.ToMatrix(template), SimpleColor.FromRgb(0, 0, 0));
 		}
@@ -49,9 +48,9 @@ namespace WrappedSearcher
 		}
 
 		/// <summary>
-		/// Загружает из потока объект WrappedSearcher, сохранённый при помощи метода Save.
+		/// Загружает из потока объект SearchingTools, сохранённый при помощи метода Save.
 		/// </summary>
-		public static WrappedSearcher Load(Stream input)
+		public static BitmapSearcher Load(Stream input)
 		{
 			return SerializationHelper.Deserialize(input);
 		}
