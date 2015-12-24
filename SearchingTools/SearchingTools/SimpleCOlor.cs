@@ -1,7 +1,7 @@
-﻿
-namespace SearchingTools
+﻿namespace SearchingTools
 {
 	// Just a RGB point (without Alpha and etc.)
+	[System.Serializable]
 	public struct SimpleColor
 	{
 		public byte R;
