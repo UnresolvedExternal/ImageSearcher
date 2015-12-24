@@ -7,6 +7,7 @@ namespace SearchingTools
 {
 	/// <summary>
 	/// При неудачной сериализации восстанавливает состояние потока
+	/// Проблемы из-за буфферизации.
 	/// </summary>
 	internal static class SerializationHelper
 	{
