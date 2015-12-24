@@ -23,6 +23,7 @@ namespace SearchingTools
 		{
 			int width = image.Width;
 			int height = image.Height;
+			
 			BitmapData imageData =
 				image.LockBits(new Rectangle(Point.Empty, image.Size), System.Drawing.Imaging.ImageLockMode.ReadOnly, image.PixelFormat);
 			var imageStride = imageData.Stride;
