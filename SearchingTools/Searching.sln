@@ -7,6 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SearchingTools", "Searching
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitmapSearcher", "WrappedSearcher\BitmapSearcher.csproj", "{D868685A-E928-4F44-87F0-EDC2BDC716C9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitmapSearcherStore", "BitmapSearcherStore\BitmapSearcherStore.csproj", "{27CA658C-F9FD-4A20-8667-E442C9A67959}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StoreEditor", "StoreEditor\StoreEditor.csproj", "{1CCB50C8-A3FF-4DF9-8E55-11FFD247CED5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{D868685A-E928-4F44-87F0-EDC2BDC716C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D868685A-E928-4F44-87F0-EDC2BDC716C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D868685A-E928-4F44-87F0-EDC2BDC716C9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{27CA658C-F9FD-4A20-8667-E442C9A67959}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{27CA658C-F9FD-4A20-8667-E442C9A67959}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{27CA658C-F9FD-4A20-8667-E442C9A67959}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{27CA658C-F9FD-4A20-8667-E442C9A67959}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1CCB50C8-A3FF-4DF9-8E55-11FFD247CED5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1CCB50C8-A3FF-4DF9-8E55-11FFD247CED5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1CCB50C8-A3FF-4DF9-8E55-11FFD247CED5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1CCB50C8-A3FF-4DF9-8E55-11FFD247CED5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

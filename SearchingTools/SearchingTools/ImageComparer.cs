@@ -17,7 +17,7 @@ namespace SearchingTools
 		public static SimpleColor CalculateDifference(SimpleColor[][] image, Point imageStart, 
 			SimpleColor[][] template, SimpleColor reservedColor)
 		{
-			double red = 0, green = 0, blue = 0;
+			int red = 0, green = 0, blue = 0;
 			int uncounted = 0;
 			for (int dx = 0; dx < template.GetLength(0); ++dx)
 				for (int dy = 0; dy < template[0].GetLength(0); ++dy)
