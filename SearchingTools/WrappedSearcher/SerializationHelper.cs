@@ -18,12 +18,7 @@ namespace SearchingTools
 			using (var memory = new MemoryStream())
 			{
 				formatter.WriteObject(memory, obj);
-				var bytes = memory.GetBuffer();
-				var size = memory.Length;
-				using (var zip = new GZipStream(output, CompressionLevel.Fastest, true))
-				{
-					zip.Write(bytes, 0, (int)size);
-				}
+				memory.WriteTo(output);
 			}
 		}
 
@@ -33,8 +28,7 @@ namespace SearchingTools
 			BitmapSearcher result;
 			try
 			{
-				using (var zip = new GZipStream(input, CompressionMode.Decompress, true))
-					result = (BitmapSearcher)formatter.ReadObject(new BufferedStream(zip));
+				result = (BitmapSearcher)formatter.ReadObject(input);
 			}
 			catch
 			{

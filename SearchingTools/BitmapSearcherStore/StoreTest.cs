@@ -1,21 +1,23 @@
-﻿using NUnit.Framework;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using NUnit.Framework;
+using System.IO;
+using System.Drawing;
 using System.Text.RegularExpressions;
 
 namespace SearchingTools
 {
 	[TestFixture]
-	class SimpleTest
+	class StoreTest
 	{
 		static string QuestionFolder;
 		static string LearnFolder;
 		static string AnswerFolder;
 
-		static SimpleTest()
+		static StoreTest()
 		{
 			Environment.CurrentDirectory = Path.Combine(Environment.CurrentDirectory, @"..\..\Tests");
 			QuestionFolder = Path.Combine(Environment.CurrentDirectory, @"Questions");
@@ -59,40 +61,18 @@ namespace SearchingTools
 		}
 
 		[Test]
-		public void GoldTest()
+		public void SaveImproveLoad()
 		{
 			var g = CreateAndLearnSearcher();
+			var store = new BitmapSearcherStore();
+			store.Add("panasonic", g);
+			store.Add("unisonic", g);
+			store.Save(Path.Combine(AnswerFolder, "store.dat"));
+			g = null;
+			store = null;
+			store = BitmapSearcherStore.Load(Path.Combine(AnswerFolder, "store.dat"));
+			g = store["unisonic"];
 			MarkItems(g, g.TemplateSize);
-		}
-
-		[Test]
-		public void AndvancedGoldTest()
-		{
-			var g = CreateAndLearnSearcher();
-			using (var fs = new FileStream(Path.Combine(AnswerFolder, "saves.txt"), FileMode.Create))
-			{
-				g.Save(fs);
-			}
-			using (var fs = new FileStream(Path.Combine(AnswerFolder, "saves.txt"), FileMode.Open))
-			{
-				var g2 = BitmapSearcher.Load(fs);
-				MarkItems(g2, g2.TemplateSize);
-			}
-		}
-
-		[Test]
-		public void SaveTest()
-		{
-			using (var fs = new FileStream(Path.Combine(AnswerFolder, "saves.txt"), FileMode.Create))
-			{
-				var g = CreateAndLearnSearcher((ws) =>
-					{
-						ws.Save(fs);
-						var t = new System.IO.StreamWriter(fs);
-						t.Write(Environment.NewLine);
-						t.Flush();
-					});
-			}
 		}
 	}
 }

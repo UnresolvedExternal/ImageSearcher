@@ -40,8 +40,10 @@ namespace SearchingTools
 				throw new ArgumentException(
 					string.Format("To small size of template. Required at least: width = {0}, height = {1}", 
 						smallPictureWidth + 1, smallPictureHeight + 1));
+						
 			this.template = template;
 			this.reservedColor = reservedColor;
+			
 			InitializeSmallPictureTemlpate();
 		}
 
@@ -50,9 +52,12 @@ namespace SearchingTools
 		{
 			int left = (template.GetLength(0) - smallPictureWidth) / 2;
 			int top = (template[0].GetLength(0) - smallPictureHeight) / 2;
+			
 			smallPictureRegion = new Rectangle(left, top, smallPictureWidth, smallPictureHeight);
+			
 			smallPictureTemplate = ImageConverter.CreateMatrix<SimpleColor>(smallPictureRegion.Width, 
 				smallPictureRegion.Height);
+				
 			for (int x = 0; x < smallPictureRegion.Width; ++x)
 				for (int y = 0; y < smallPictureRegion.Height; ++y)
 					smallPictureTemplate[x][y] = template[smallPictureRegion.Left + x][smallPictureRegion.Top + y];
@@ -65,6 +70,7 @@ namespace SearchingTools
 		{
 			int maxX = source.GetLength(0) - template.GetLength(0);
 			int maxY = source[0].GetLength(0) - template[0].GetLength(0);
+			
 			for (int x = 0; x < maxX; ++x)
 				for (int y = 0; y < maxY; ++y)
 				{
@@ -83,7 +89,7 @@ namespace SearchingTools
 		public IEnumerable<Point> GetPositions(SimpleColor[][] source)
 		{
 			var smallPicturePositions = GetSmallPicturePositions(source);
-			var hm = smallPicturePositions.Count(); //DEBUG !!!
+			
 			foreach (var pos in smallPicturePositions)
 				if (ImageComparer.AreEqual(
 					source,
@@ -97,7 +103,7 @@ namespace SearchingTools
 		}
 
 		/// <summary>
-		/// Finds .bmp files in given directory. (Each .bmp filename must consists a number - how much positions
+		/// Finds .bmp files in given directory. (Each .bmp filename must consists of a number - how much positions
 		/// are satisfied to template. According to image and this info, this method sets maximal admissible
 		/// differences of RGB components.
 		/// </summary>
@@ -105,6 +111,7 @@ namespace SearchingTools
 		{
 			this.maxDifference = SimpleColor.FromRgb(0, 0, 0);
 			this.smallPictureMaxDifference = SimpleColor.FromRgb(0, 0, 0);
+			
 			foreach (var filename in Directory.GetFiles(directory).Where(name => name.ToUpper().EndsWith(".BMP")))
 			{
 				Bitmap source = Image.FromFile(filename) as Bitmap;
@@ -122,9 +129,12 @@ namespace SearchingTools
 		{
 			SimpleColor[] minValues = 
 				Enumerable.Repeat(SimpleColor.FromRgb(byte.MaxValue, byte.MaxValue, byte.MaxValue), elementsCount).ToArray();
+				
 			Point[] positions = new Point[elementsCount];
+			
 			int maxX = sourceMatrix.GetLength(0) - template.GetLength(0);
 			int maxY = sourceMatrix[0].GetLength(0) - template[0].GetLength(0);
+			
 			for (int x = 0; x < maxX; ++x)
 				for (int y = 0; y < maxY; ++y)
 				{
@@ -135,6 +145,7 @@ namespace SearchingTools
 						SimpleColor.FromRgb(0, 0, 0));
 					SmartInsert(minValues, positions, diff, new Point(x, y));
 				}
+				
 			UpdateMaxDifference(minValues);
 			ModifySmallPictureMaxDifference(sourceMatrix, positions);
 		}
@@ -142,18 +153,21 @@ namespace SearchingTools
 		private void UpdateMaxDifference(SimpleColor[] minValues)
 		{
 			byte[] newDiff = new[] { this.maxDifference.R, this.maxDifference.G, this.maxDifference.B };
+			
 			foreach (var color in minValues)
 			{
 				newDiff[0] = Math.Max(newDiff[0], color.R);
 				newDiff[1] = Math.Max(newDiff[1], color.G);
 				newDiff[2] = Math.Max(newDiff[2], color.B);
 			}
+			
 			this.maxDifference = SimpleColor.FromRgb(newDiff[0], newDiff[1], newDiff[2]);
 		}
 
 		private void ModifySmallPictureMaxDifference(SimpleColor[][] sourceMatrix, Point[] positions)
 		{
 			byte[] newDiff = new[] { this.smallPictureMaxDifference.R, this.smallPictureMaxDifference.G, this.smallPictureMaxDifference.B };
+			
 			foreach (var position in positions)
 			{
 				SimpleColor simpleColor = ImageComparer.CalculateDifference(
@@ -165,15 +179,18 @@ namespace SearchingTools
 				newDiff[1] = Math.Max(newDiff[1], simpleColor.G);
 				newDiff[2] = Math.Max(newDiff[2], simpleColor.B);
 			}
+			
 			this.smallPictureMaxDifference = SimpleColor.FromRgb(newDiff[0], newDiff[1], newDiff[2]);
 		}
 
 		private static void SmartInsert(SimpleColor[] minValues, Point[] positions, SimpleColor value, Point pos)
 		{
 			int indexOfMax = 0;
+			
 			for (int i = 1; i < minValues.Length; ++i)
 				if (Compare(minValues[i], minValues[indexOfMax]) > 0)
 					indexOfMax = i;
+					
 			if (Compare(value, minValues[indexOfMax]) < 0)
 			{
 				minValues[indexOfMax] = value;
