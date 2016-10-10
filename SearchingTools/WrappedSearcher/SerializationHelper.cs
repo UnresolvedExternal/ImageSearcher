@@ -6,8 +6,7 @@ using System.Text;
 namespace SearchingTools
 {
 	/// <summary>
-	/// При неудачной сериализации восстанавливает состояние потока
-	/// Проблемы из-за буфферизации.
+	/// Сериализует объекты BitmapSearcher
 	/// </summary>
 	internal static class SerializationHelper
 	{
@@ -23,6 +22,11 @@ namespace SearchingTools
 			}
 		}
 
+		/// <summary>
+		/// Десериализует объект. Восстанавливает поток в случае ошибки.
+		/// </summary>
+		/// <param name="input"></param>
+		/// <returns></returns>
 		public static BitmapSearcher Deserialize(Stream input)
 		{
 			var oldPosition = input.Position;

@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{27CA658C-F9FD-4A20-8667-E442C9A67959}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{B66651D6-8525-43E4-976A-6EDF8BDD37F9}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SearchingTools</RootNamespace>
-    <AssemblyName>BitmapSearcherStore</AssemblyName>
+    <RootNamespace>GameControl</RootNamespace>
+    <AssemblyName>GameControl</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -20,8 +20,6 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
-    <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -31,6 +29,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="nunit.framework, Version=3.5.0.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -39,7 +40,8 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
-    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Windows" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -47,29 +49,31 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BitmapSearcherStore.cs" />
-    <Compile Include="SimpleStore.cs" />
+    <Compile Include="Logger.cs" />
+    <Compile Include="ManualTest.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="ScreenGameShim.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="StoreTest.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SearchingTools\SearchingTools.csproj">
-      <Project>{a86b60a2-6c0c-4720-b34a-36d6f5f7cebc}</Project>
-      <Name>SearchingTools</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\WrappedSearcher\BitmapSearcher.csproj">
-      <Project>{d868685a-e928-4f44-87f0-edc2bdc716c9}</Project>
-      <Name>BitmapSearcher</Name>
-    </ProjectReference>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup>
-    <WCFMetadata Include="Service References\" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
+    <ProjectReference Include="..\BitmapSearcherStore\BitmapSearcherStore.csproj">
+      <Project>{27ca658c-f9fd-4a20-8667-e442c9a67959}</Project>
+      <Name>BitmapSearcherStore</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GodsGameApi\GodsGameApi.csproj">
+      <Project>{2b774d8b-c81d-42bc-8fda-eaf3e50632f8}</Project>
+      <Name>GodsGameApi</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MouseManipulator\MouseManipulator.csproj">
+      <Project>{1253fd54-08db-4819-a61e-1f4e4a6b8531}</Project>
+      <Name>MouseManipulator</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

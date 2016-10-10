@@ -11,6 +11,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitmapSearcherStore", "Bitm
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StoreEditor", "StoreEditor\StoreEditor.csproj", "{1CCB50C8-A3FF-4DF9-8E55-11FFD247CED5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MouseManipulator", "MouseManipulator\MouseManipulator.csproj", "{1253FD54-08DB-4819-A61E-1F4E4A6B8531}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GodsGameApi", "GodsGameApi\GodsGameApi.csproj", "{2B774D8B-C81D-42BC-8FDA-EAF3E50632F8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameControl", "GameControl\GameControl.csproj", "{B66651D6-8525-43E4-976A-6EDF8BDD37F9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,8 +39,23 @@ Global
 		{1CCB50C8-A3FF-4DF9-8E55-11FFD247CED5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1CCB50C8-A3FF-4DF9-8E55-11FFD247CED5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1CCB50C8-A3FF-4DF9-8E55-11FFD247CED5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1253FD54-08DB-4819-A61E-1F4E4A6B8531}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1253FD54-08DB-4819-A61E-1F4E4A6B8531}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1253FD54-08DB-4819-A61E-1F4E4A6B8531}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1253FD54-08DB-4819-A61E-1F4E4A6B8531}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2B774D8B-C81D-42BC-8FDA-EAF3E50632F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B774D8B-C81D-42BC-8FDA-EAF3E50632F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B774D8B-C81D-42BC-8FDA-EAF3E50632F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B774D8B-C81D-42BC-8FDA-EAF3E50632F8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B66651D6-8525-43E4-976A-6EDF8BDD37F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B66651D6-8525-43E4-976A-6EDF8BDD37F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B66651D6-8525-43E4-976A-6EDF8BDD37F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B66651D6-8525-43E4-976A-6EDF8BDD37F9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
 	EndGlobalSection
 EndGlobal

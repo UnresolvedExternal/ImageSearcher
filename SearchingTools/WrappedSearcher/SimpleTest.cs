@@ -8,6 +8,8 @@ using System.Text.RegularExpressions;
 
 namespace SearchingTools
 {
+
+	// ТЕСТЫ ПРОВЕРЯТЬ ВРУЧНУЮ !
 	[TestFixture]
 	class SimpleTest
 	{

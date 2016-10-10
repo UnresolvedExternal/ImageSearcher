@@ -28,162 +28,195 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			this.components = new System.ComponentModel.Container();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
-			this.button1 = new System.Windows.Forms.Button();
-			this.button2 = new System.Windows.Forms.Button();
+			this.saveButton = new System.Windows.Forms.Button();
+			this.loadButton = new System.Windows.Forms.Button();
+			this.createButton = new System.Windows.Forms.Button();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
-			this.button3 = new System.Windows.Forms.Button();
-			this.comboBox1 = new System.Windows.Forms.ComboBox();
-			this.textBox1 = new System.Windows.Forms.TextBox();
-			this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-			this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
-			this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripMenuItem();
-			this.toolStripMenuItem4 = new System.Windows.Forms.ToolStripMenuItem();
+			this.templateNamesListBox = new System.Windows.Forms.ListBox();
+			this.viewTemplateButton = new System.Windows.Forms.Button();
+			this.upgradeTemplateButton = new System.Windows.Forms.Button();
+			this.addTemplateButton = new System.Windows.Forms.Button();
+			this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+			this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
+			this.tasksCountLabel = new System.Windows.Forms.ToolStripStatusLabel();
+			this.removeTemplateButton = new System.Windows.Forms.Button();
 			this.groupBox1.SuspendLayout();
 			this.groupBox2.SuspendLayout();
-			this.contextMenuStrip1.SuspendLayout();
+			this.statusStrip1.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// groupBox1
 			// 
-			this.groupBox1.Controls.Add(this.button3);
-			this.groupBox1.Controls.Add(this.button2);
-			this.groupBox1.Controls.Add(this.button1);
+			this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+			this.groupBox1.Controls.Add(this.saveButton);
+			this.groupBox1.Controls.Add(this.loadButton);
+			this.groupBox1.Controls.Add(this.createButton);
 			this.groupBox1.Location = new System.Drawing.Point(12, 12);
 			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Size = new System.Drawing.Size(147, 148);
+			this.groupBox1.Size = new System.Drawing.Size(147, 201);
 			this.groupBox1.TabIndex = 0;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Choosing store";
 			// 
-			// button1
+			// saveButton
 			// 
-			this.button1.Location = new System.Drawing.Point(6, 19);
-			this.button1.Name = "button1";
-			this.button1.Size = new System.Drawing.Size(135, 38);
-			this.button1.TabIndex = 1;
-			this.button1.Text = "Create new";
-			this.button1.UseVisualStyleBackColor = true;
+			this.saveButton.Location = new System.Drawing.Point(6, 107);
+			this.saveButton.Name = "saveButton";
+			this.saveButton.Size = new System.Drawing.Size(135, 38);
+			this.saveButton.TabIndex = 3;
+			this.saveButton.Text = "Save";
+			this.saveButton.UseVisualStyleBackColor = true;
+			this.saveButton.Click += new System.EventHandler(this.saveButton_Click);
 			// 
-			// button2
+			// loadButton
 			// 
-			this.button2.Location = new System.Drawing.Point(6, 63);
-			this.button2.Name = "button2";
-			this.button2.Size = new System.Drawing.Size(135, 38);
-			this.button2.TabIndex = 2;
-			this.button2.Text = "Load existing";
-			this.button2.UseVisualStyleBackColor = true;
+			this.loadButton.Location = new System.Drawing.Point(6, 63);
+			this.loadButton.Name = "loadButton";
+			this.loadButton.Size = new System.Drawing.Size(135, 38);
+			this.loadButton.TabIndex = 2;
+			this.loadButton.Text = "Load existing";
+			this.loadButton.UseVisualStyleBackColor = true;
+			this.loadButton.Click += new System.EventHandler(this.loadButton_Click);
+			// 
+			// createButton
+			// 
+			this.createButton.Location = new System.Drawing.Point(6, 19);
+			this.createButton.Name = "createButton";
+			this.createButton.Size = new System.Drawing.Size(135, 38);
+			this.createButton.TabIndex = 1;
+			this.createButton.Text = "Create new";
+			this.createButton.UseVisualStyleBackColor = true;
+			this.createButton.Click += new System.EventHandler(this.createButton_Click);
 			// 
 			// groupBox2
 			// 
-			this.groupBox2.Controls.Add(this.textBox1);
-			this.groupBox2.Controls.Add(this.comboBox1);
+			this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.groupBox2.Controls.Add(this.removeTemplateButton);
+			this.groupBox2.Controls.Add(this.templateNamesListBox);
+			this.groupBox2.Controls.Add(this.viewTemplateButton);
+			this.groupBox2.Controls.Add(this.upgradeTemplateButton);
+			this.groupBox2.Controls.Add(this.addTemplateButton);
 			this.groupBox2.Location = new System.Drawing.Point(165, 12);
 			this.groupBox2.Name = "groupBox2";
-			this.groupBox2.Size = new System.Drawing.Size(385, 148);
+			this.groupBox2.Size = new System.Drawing.Size(458, 201);
 			this.groupBox2.TabIndex = 1;
 			this.groupBox2.TabStop = false;
 			this.groupBox2.Text = "Editor";
 			// 
-			// button3
+			// templateNamesListBox
 			// 
-			this.button3.Enabled = false;
-			this.button3.Location = new System.Drawing.Point(6, 107);
-			this.button3.Name = "button3";
-			this.button3.Size = new System.Drawing.Size(135, 38);
-			this.button3.TabIndex = 3;
-			this.button3.Text = "Save";
-			this.button3.UseVisualStyleBackColor = true;
+			this.templateNamesListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.templateNamesListBox.FormattingEnabled = true;
+			this.templateNamesListBox.Location = new System.Drawing.Point(6, 50);
+			this.templateNamesListBox.Name = "templateNamesListBox";
+			this.templateNamesListBox.Size = new System.Drawing.Size(447, 147);
+			this.templateNamesListBox.TabIndex = 7;
 			// 
-			// comboBox1
+			// viewTemplateButton
 			// 
-			this.comboBox1.AutoCompleteCustomSource.AddRange(new string[] {
-            "assa",
-            "abcd",
-            "abce",
-            "abcf"});
-			this.comboBox1.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
-			this.comboBox1.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
-			this.comboBox1.ContextMenuStrip = this.contextMenuStrip1;
-			this.comboBox1.FormattingEnabled = true;
-			this.comboBox1.ImeMode = System.Windows.Forms.ImeMode.Off;
-			this.comboBox1.Items.AddRange(new object[] {
-            "abc",
-            "abcd",
-            "abce",
-            "abcf",
-            "ade"});
-			this.comboBox1.Location = new System.Drawing.Point(6, 47);
-			this.comboBox1.Name = "comboBox1";
-			this.comboBox1.Size = new System.Drawing.Size(373, 21);
-			this.comboBox1.TabIndex = 0;
+			this.viewTemplateButton.Location = new System.Drawing.Point(232, 16);
+			this.viewTemplateButton.Name = "viewTemplateButton";
+			this.viewTemplateButton.Size = new System.Drawing.Size(107, 25);
+			this.viewTemplateButton.TabIndex = 6;
+			this.viewTemplateButton.Text = "View Template";
+			this.viewTemplateButton.UseVisualStyleBackColor = true;
+			this.viewTemplateButton.Click += new System.EventHandler(this.viewTemplateButton_Click);
 			// 
-			// textBox1
+			// upgradeTemplateButton
 			// 
-			this.textBox1.Location = new System.Drawing.Point(6, 19);
-			this.textBox1.Name = "textBox1";
-			this.textBox1.Size = new System.Drawing.Size(100, 20);
-			this.textBox1.TabIndex = 1;
+			this.upgradeTemplateButton.Location = new System.Drawing.Point(119, 16);
+			this.upgradeTemplateButton.Name = "upgradeTemplateButton";
+			this.upgradeTemplateButton.Size = new System.Drawing.Size(107, 25);
+			this.upgradeTemplateButton.TabIndex = 5;
+			this.upgradeTemplateButton.Text = "Upgrade template";
+			this.upgradeTemplateButton.UseVisualStyleBackColor = true;
+			this.upgradeTemplateButton.Click += new System.EventHandler(this.upgradeTemplateButton_Click);
 			// 
-			// contextMenuStrip1
+			// addTemplateButton
 			// 
-			this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripMenuItem2,
-            this.toolStripMenuItem4});
-			this.contextMenuStrip1.Name = "contextMenuStrip1";
-			this.contextMenuStrip1.Size = new System.Drawing.Size(99, 48);
+			this.addTemplateButton.Location = new System.Drawing.Point(6, 16);
+			this.addTemplateButton.Name = "addTemplateButton";
+			this.addTemplateButton.Size = new System.Drawing.Size(107, 25);
+			this.addTemplateButton.TabIndex = 4;
+			this.addTemplateButton.Text = "Add template";
+			this.addTemplateButton.UseVisualStyleBackColor = true;
+			this.addTemplateButton.Click += new System.EventHandler(this.addTemplateButton_Click);
 			// 
-			// toolStripMenuItem2
+			// statusStrip1
 			// 
-			this.toolStripMenuItem2.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripMenuItem3});
-			this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-			this.toolStripMenuItem2.Size = new System.Drawing.Size(98, 22);
-			this.toolStripMenuItem2.Text = "5165";
+			this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripStatusLabel1,
+            this.tasksCountLabel});
+			this.statusStrip1.Location = new System.Drawing.Point(0, 221);
+			this.statusStrip1.Name = "statusStrip1";
+			this.statusStrip1.Size = new System.Drawing.Size(630, 22);
+			this.statusStrip1.TabIndex = 2;
+			this.statusStrip1.Text = "statusStrip";
 			// 
-			// toolStripMenuItem3
+			// toolStripStatusLabel1
 			// 
-			this.toolStripMenuItem3.Name = "toolStripMenuItem3";
-			this.toolStripMenuItem3.Size = new System.Drawing.Size(152, 22);
-			this.toolStripMenuItem3.Text = "6544";
+			this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
+			this.toolStripStatusLabel1.Size = new System.Drawing.Size(116, 17);
+			this.toolStripStatusLabel1.Text = "Upgrades in process:";
 			// 
-			// toolStripMenuItem4
+			// tasksCountLabel
 			// 
-			this.toolStripMenuItem4.Name = "toolStripMenuItem4";
-			this.toolStripMenuItem4.Size = new System.Drawing.Size(98, 22);
-			this.toolStripMenuItem4.Text = "654";
+			this.tasksCountLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+			this.tasksCountLabel.Name = "tasksCountLabel";
+			this.tasksCountLabel.Size = new System.Drawing.Size(14, 17);
+			this.tasksCountLabel.Text = "0";
+			// 
+			// removeTemplateButton
+			// 
+			this.removeTemplateButton.Location = new System.Drawing.Point(345, 16);
+			this.removeTemplateButton.Name = "removeTemplateButton";
+			this.removeTemplateButton.Size = new System.Drawing.Size(107, 25);
+			this.removeTemplateButton.TabIndex = 8;
+			this.removeTemplateButton.Text = "Remove template";
+			this.removeTemplateButton.UseVisualStyleBackColor = true;
+			this.removeTemplateButton.Click += new System.EventHandler(this.removeTemplateButton_Click);
 			// 
 			// StoreEditor
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(562, 172);
+			this.ClientSize = new System.Drawing.Size(630, 243);
+			this.Controls.Add(this.statusStrip1);
 			this.Controls.Add(this.groupBox2);
 			this.Controls.Add(this.groupBox1);
 			this.Name = "StoreEditor";
 			this.Text = "Bitmap templates editor";
+			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.StoreEditor_FormClosing);
 			this.groupBox1.ResumeLayout(false);
 			this.groupBox2.ResumeLayout(false);
-			this.groupBox2.PerformLayout();
-			this.contextMenuStrip1.ResumeLayout(false);
+			this.statusStrip1.ResumeLayout(false);
+			this.statusStrip1.PerformLayout();
 			this.ResumeLayout(false);
+			this.PerformLayout();
 
 		}
 
 		#endregion
 
 		private System.Windows.Forms.GroupBox groupBox1;
-		private System.Windows.Forms.Button button2;
-		private System.Windows.Forms.Button button1;
+		private System.Windows.Forms.Button loadButton;
+		private System.Windows.Forms.Button createButton;
 		private System.Windows.Forms.GroupBox groupBox2;
-		private System.Windows.Forms.Button button3;
-		private System.Windows.Forms.TextBox textBox1;
-		private System.Windows.Forms.ComboBox comboBox1;
-		private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
-		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem2;
-		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem3;
-		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem4;
+		private System.Windows.Forms.Button saveButton;
+		private System.Windows.Forms.StatusStrip statusStrip1;
+		private System.Windows.Forms.Button addTemplateButton;
+		private System.Windows.Forms.Button upgradeTemplateButton;
+		private System.Windows.Forms.Button viewTemplateButton;
+		private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
+		private System.Windows.Forms.ToolStripStatusLabel tasksCountLabel;
+		private System.Windows.Forms.ListBox templateNamesListBox;
+		private System.Windows.Forms.Button removeTemplateButton;
 	}
 }
 

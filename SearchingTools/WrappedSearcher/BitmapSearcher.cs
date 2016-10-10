@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Runtime.Serialization.Json;
 using Converter = SearchingTools.ImageConverter;
 
 namespace SearchingTools
@@ -21,6 +23,23 @@ namespace SearchingTools
 		public BitmapSearcher(Bitmap template)
 		{
 			searcher = new ImageSearcher(Converter.ToMatrix(template), SimpleColor.FromRgb(0, 0, 0));
+		}
+
+		public Bitmap GetTemplate()
+		{
+			return Converter.ToBitmap(searcher.GetTemplate());
+		}
+
+		public BitmapSearcher DeepClone()
+		{
+			using (var memory = new MemoryStream())
+			{
+				var xxx = new DataContractJsonSerializerSettings();
+				var formatter = new DataContractJsonSerializer(GetType());
+				formatter.WriteObject(memory, this);
+				memory.Position = 0;
+				return (BitmapSearcher)formatter.ReadObject(memory);
+			}
 		}
 
 		/// <summary>
@@ -63,5 +82,19 @@ namespace SearchingTools
 		public int TemplateWidth { get { return searcher.TemplateWidth; } }
 		public int TemplateHeight { get { return searcher.TemplateHeight; } }
 		public Size TemplateSize { get { return new Size(TemplateWidth, TemplateHeight); } }
-    }
+
+		public SimpleColor GetAdmissibleDifferences()
+		{
+			return searcher.GetAdmissibleDifferences();
+		}
+
+		/// <summary>
+		/// Объединяет поисковики, представляющие одинаковые шаблоны
+		/// </summary>
+		/// <param name="newSearcher"></param>
+		public void Upgrade(BitmapSearcher newSearcher)
+		{
+			newSearcher.searcher.UpgradeThisAndOther(this.searcher);
+		}
+	}
 }

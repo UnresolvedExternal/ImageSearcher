@@ -1,8 +1,10 @@
-﻿namespace SearchingTools
+﻿using System;
+
+namespace SearchingTools
 {
 	// Just a RGB point (without Alpha and etc.)
 	[System.Serializable]
-	public struct SimpleColor
+	public struct SimpleColor: IEquatable<SimpleColor>
 	{
 		public byte R;
 		public byte G;
@@ -37,14 +39,32 @@
 
 		public override bool Equals(object obj)
 		{
-			return base.Equals(obj);
+			try
+			{
+				return Equals((SimpleColor)obj);
+			} 
+			catch (InvalidCastException)
+			{
+				return false;
+			}
 		}
 
 		public override int GetHashCode()
 		{
-			return base.GetHashCode();
+			int digit = byte.MaxValue + 1;
+			return R * digit * digit + G * digit + B;
+		}
+
+		public bool Equals(SimpleColor other)
+		{
+			return this == other;
 		}
 
 		#endregion
+
+		public override string ToString()
+		{
+			return string.Format("({0}, {1}, {2})", R, G, B);
+		}
 	}
 }
