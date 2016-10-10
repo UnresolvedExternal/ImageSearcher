@@ -384,12 +384,17 @@ namespace GodsGameApi
 			double damage;
 			int addBombs = isBomb ? -1 : 0;
 			int addDynamits = isBomb ? 0 : -1;
+			
 			var result = state.Clone();
 
 			ExplodeOnce(explositionShape, result.Board, out heal, out damage);
+			
+			// TODO: вынести информацию о доп. уроне в класс Player
 			damage += isBomb ? +2 : +3;
-			addBombs %= 2;
-			addDynamits %= 2;
+			
+			addBombs = Math.Min(addBombs, 1);
+			addDynamits = Math.Min(addDynamits, 1);
+
 			ChangeGameState(result, heal, damage, addBombs, addDynamits);
 			ExplodeSecondariesOnly(result);
 			
@@ -403,7 +408,7 @@ namespace GodsGameApi
 		/// <param name="state"></param>
 		private void AddSwaps(Dictionary<Movement, ClassicGameState> dest, ClassicGameState state)
 		{
-			foreach (var movement in GetAllUnchekedSwaps(state.Board))
+			foreach (var movement in GetAllUncheckedSwaps(state.Board))
 			{
 				var classicMovement = (ClassicMovement)movement;
 				Point first = classicMovement.First;
@@ -423,7 +428,7 @@ namespace GodsGameApi
 		/// </summary>
 		/// <param name="board"></param>
 		/// <returns></returns>
-		private static IEnumerable<Movement> GetAllUnchekedSwaps(SimpleBoard board)
+		private static IEnumerable<Movement> GetAllUncheckedSwaps(SimpleBoard board)
 		{
 			int width = board.Width;
 			int height = board.Height;
