@@ -35,7 +35,7 @@ namespace GodsGameApi
 			if (leftHp <= 0)
 				return -1000 * 1000;
 
-			return (leftHp + 16) / (double)(rightHp + 16);
+			return (leftHp + 15) / (double)(rightHp + 15);
 		}
 		
 		/// <summary>
