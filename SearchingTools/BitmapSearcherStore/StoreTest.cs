@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 
 namespace SearchingTools
 {
+	// ПРОВЕРЯТЬ ВРУЧНУЮ !
 	[TestFixture]
 	class StoreTest
 	{
@@ -64,13 +65,13 @@ namespace SearchingTools
 		public void SaveImproveLoad()
 		{
 			var g = CreateAndLearnSearcher();
-			var store = new BitmapSearcherStore();
+			var store = new SimpleStore();
 			store.Add("panasonic", g);
 			store.Add("unisonic", g);
 			store.Save(Path.Combine(AnswerFolder, "store.dat"));
 			g = null;
 			store = null;
-			store = BitmapSearcherStore.Load(Path.Combine(AnswerFolder, "store.dat"));
+			store = SimpleStore.Load(Path.Combine(AnswerFolder, "store.dat"));
 			g = store["unisonic"];
 			MarkItems(g, g.TemplateSize);
 		}

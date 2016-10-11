@@ -23,6 +23,7 @@ namespace SearchingTools
 		{
 			int width = image.Width;
 			int height = image.Height;
+			
 			BitmapData imageData =
 				image.LockBits(new Rectangle(Point.Empty, image.Size), System.Drawing.Imaging.ImageLockMode.ReadOnly, image.PixelFormat);
 			var imageStride = imageData.Stride;
@@ -51,7 +52,7 @@ namespace SearchingTools
 		{
 			int width = matrix.Length;
 			int height = matrix[0].Length;
-			Bitmap result = new Bitmap(width, height);
+			Bitmap result = new Bitmap(width, height, PixelFormat.Format32bppRgb);
 			BitmapData imageData =
 				result.LockBits(new Rectangle(Point.Empty, result.Size), System.Drawing.Imaging.ImageLockMode.WriteOnly, result.PixelFormat);
 			var imageStride = imageData.Stride;

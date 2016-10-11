@@ -4,6 +4,8 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Collections.Concurrent;
+using System.Threading.Tasks;
 
 namespace SearchingTools
 {
@@ -34,6 +36,11 @@ namespace SearchingTools
 			return (first.R + first.G + first.B).CompareTo(second.R + second.G + second.B);
 		}
 
+		public SimpleColor[][] GetTemplate()
+		{
+			return template;
+		}
+
 		public ImageSearcher(SimpleColor[][] template, SimpleColor reservedColor)
 		{
 			if (template.GetLength(0) <= smallPictureWidth || template[0].GetLength(0) <= smallPictureHeight)
@@ -44,11 +51,11 @@ namespace SearchingTools
 			this.template = template;
 			this.reservedColor = reservedColor;
 			
-			InitializeSmallPictureTemlpate();
+			InitializeSmallPictureTemplate();
 		}
 
 		// Middle subregion of template
-		private void InitializeSmallPictureTemlpate()
+		private void InitializeSmallPictureTemplate()
 		{
 			int left = (template.GetLength(0) - smallPictureWidth) / 2;
 			int top = (template[0].GetLength(0) - smallPictureHeight) / 2;
@@ -70,28 +77,37 @@ namespace SearchingTools
 		{
 			int maxX = source.GetLength(0) - template.GetLength(0);
 			int maxY = source[0].GetLength(0) - template[0].GetLength(0);
-			
-			for (int x = 0; x < maxX; ++x)
-				for (int y = 0; y < maxY; ++y)
+			var lists = new List<Point>[maxX];
+
+			Parallel.For(0, maxX, x =>
 				{
-					if (ImageComparer.AreEqual(
-						source,
-						new Point(x + smallPictureRegion.Left, y + smallPictureRegion.Top),
-						smallPictureTemplate,
-						reservedColor,
-						smallPictureMaxDifference))
+					lists[x] = new List<Point>();
+					for (int y = 0; y < maxY; ++y)
 					{
-						yield return (new Point(x, y));
+						if (ImageComparer.Equals(
+							source,
+							new Point(x + smallPictureRegion.Left, y + smallPictureRegion.Top),
+							smallPictureTemplate,
+							reservedColor,
+							smallPictureMaxDifference))
+						{
+							lists[x].Add(new Point(x, y));
+						}
 					}
-				}
+				});
+
+			for (int x = 0; x < maxX; ++x)
+				foreach (var p in lists[x])
+					yield return p;
 		}
 
 		public IEnumerable<Point> GetPositions(SimpleColor[][] source)
 		{
 			var smallPicturePositions = GetSmallPicturePositions(source);
-			
+
 			foreach (var pos in smallPicturePositions)
-				if (ImageComparer.AreEqual(
+			{
+				if (ImageComparer.Equals(
 					source,
 					pos,
 					template,
@@ -100,6 +116,8 @@ namespace SearchingTools
 				{
 					yield return pos;
 				}
+			}
+
 		}
 
 		/// <summary>
@@ -132,8 +150,8 @@ namespace SearchingTools
 				
 			Point[] positions = new Point[elementsCount];
 			
-			int maxX = sourceMatrix.GetLength(0) - template.GetLength(0);
-			int maxY = sourceMatrix[0].GetLength(0) - template[0].GetLength(0);
+			int maxX = sourceMatrix.GetLength(0) - template.GetLength(0) + 1;
+			int maxY = sourceMatrix[0].GetLength(0) - template[0].GetLength(0) + 1;
 			
 			for (int x = 0; x < maxX; ++x)
 				for (int y = 0; y < maxY; ++y)
@@ -197,5 +215,31 @@ namespace SearchingTools
 				positions[indexOfMax] = pos;
 			}
 		}
-    }
+
+		public SimpleColor GetAdmissibleDifferences()
+		{
+			return maxDifference;
+		}
+
+		public bool TemplatesEqual(ImageSearcher other)
+		{
+			return ImageComparer.Equals(GetTemplate(), other.GetTemplate());
+		}
+
+		public void UpgradeThisAndOther(ImageSearcher other)
+		{
+			if (!TemplatesEqual(other))
+				throw new InvalidOperationException("Объекты представляют разные шаблоны");
+			UniteDifferences(ref maxDifference, ref other.maxDifference);
+			UniteDifferences(ref smallPictureMaxDifference, ref other.smallPictureMaxDifference);
+		}
+
+		private static void UniteDifferences(ref SimpleColor left, ref SimpleColor right)
+		{
+			left.R = Math.Max(left.R, right.R);
+			left.G = Math.Max(left.G, right.G);
+			left.B = Math.Max(left.B, right.B);
+			right = left;
+		}
+	}
 }

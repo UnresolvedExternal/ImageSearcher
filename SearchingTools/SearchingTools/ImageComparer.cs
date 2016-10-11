@@ -35,29 +35,49 @@ namespace SearchingTools
 					red += dR * dR;
 					green += dG * dG;
 					blue += dB * dB;
-					/*
-					var dR = Math.Abs(imagePointColor.R - templatePointColor.R);
-					var dG = Math.Abs(imagePointColor.G - templatePointColor.G);
-					var dB = Math.Abs(imagePointColor.B - templatePointColor.B);
-					red += Math.Pow(dR, power);
-					green += Math.Pow(dG, power);
-					blue += Math.Pow(dB, power);
-					 * */
 				}
 			int totalPoints = template.GetLength(0) * template[0].GetLength(0) - uncounted;
 			return GetResultSimpleColor(red, green, blue, totalPoints);
 		}
 
-		private static SimpleColor GetResultSimpleColor(double red, double green, double blue, double totalPoints)
+		public static bool Equals(SimpleColor[][] left, SimpleColor[][] right)
 		{
-			red = Math.Sqrt(red);
-			green = Math.Sqrt(green);
-			blue = Math.Sqrt(blue);
+			if (object.ReferenceEquals(left, right))
+				return true;
+			int width = left.Length;
+			int heigth = left[0].Length;
+
+			if (width != right.Length || heigth != right[0].Length)
+				return false;
+
+			for (int x = 0; x < width; ++x)
+				for (int y = 0; y < heigth; ++y)
+					if (left[x][y] != right[x][y])
+						return false;
+
+			return true;
+		}
+
+		private static SimpleColor GetResultSimpleColor(
+			double redSquared, 
+			double greenSquared, 
+			double blueSquared, 
+			double totalPoints)
+		{
+			redSquared = Math.Sqrt(redSquared);
+			greenSquared = Math.Sqrt(greenSquared);
+			blueSquared = Math.Sqrt(blueSquared);
 			totalPoints = Math.Sqrt(totalPoints);
-			red /= totalPoints;
-			green /= totalPoints;
-			blue /= totalPoints;
-			return SimpleColor.FromRgb(NormalizeColorComponent(red), NormalizeColorComponent(green), NormalizeColorComponent(blue));
+
+			redSquared /= totalPoints;
+			greenSquared /= totalPoints;
+			blueSquared /= totalPoints;
+
+			return SimpleColor.FromRgb(
+				NormalizeColorComponent(redSquared), 
+				NormalizeColorComponent(greenSquared), 
+				NormalizeColorComponent(blueSquared)
+			);
 		}
 
 		private static byte NormalizeColorComponent(double simpleColorComponent)
@@ -78,7 +98,7 @@ namespace SearchingTools
 		/// <param name="reservedColor">Не учитываемый цвет в шаблоне</param>
 		/// <param name="admissibleDifference">Содержит максимальные допустимые отклонения</param>
 		/// <returns>Результат сравнения</returns>
-		public static bool AreEqual(SimpleColor[][] image, Point imageStartPoint, 
+		public static bool Equals(SimpleColor[][] image, Point imageStartPoint, 
 			SimpleColor[][] template, SimpleColor reservedColor, SimpleColor admissibleDifference)
 		{
 			SimpleColor diff = CalculateDifference(image, imageStartPoint, template, reservedColor);
