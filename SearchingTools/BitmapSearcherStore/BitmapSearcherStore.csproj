@@ -53,13 +53,13 @@
     <Compile Include="StoreTest.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\BitmapSearcher\BitmapSearcher.csproj">
+      <Project>{d868685a-e928-4f44-87f0-edc2bdc716c9}</Project>
+      <Name>BitmapSearcher</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SearchingTools\SearchingTools.csproj">
       <Project>{a86b60a2-6c0c-4720-b34a-36d6f5f7cebc}</Project>
       <Name>SearchingTools</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\WrappedSearcher\BitmapSearcher.csproj">
-      <Project>{d868685a-e928-4f44-87f0-edc2bdc716c9}</Project>
-      <Name>BitmapSearcher</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

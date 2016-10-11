@@ -76,7 +76,7 @@ namespace GodsGameApi
 			int depth, ref int switches, CancellationToken ct)
 		{
 			// Все ходы CurrentPlayer. В этих состояниях CurrentPlayer == Enemy
-			var map = new ClassicRules().GetAllMovements(state);
+			var map = rules.GetAllMovements(state);
 			
 			if (map.Count == 0)
 				return new KeyValuePair<Movement, ClassicGameState>(null, state);

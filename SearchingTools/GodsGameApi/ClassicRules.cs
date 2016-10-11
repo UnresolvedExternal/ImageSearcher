@@ -27,6 +27,19 @@ namespace GodsGameApi
 		Point[][] columnsPoints;
 		SpinLock locker = new SpinLock();
 
+		private bool NeedPointsInitialization(int newWidth, int newHeight)
+		{
+			if (!object.ReferenceEquals(rowsPoints, null) &&
+				!object.ReferenceEquals(columnsPoints, null) &&
+				rowsPoints.Length == newHeight + 1 &&
+				columnsPoints.Length == newWidth + 1)
+			{
+				return false;
+			}
+
+			return true;
+		}
+
 		private void InitializeRowsAndColumnsPoints(int width, int height)
 		{
 			rowsPoints = new Point[height + 1][];
@@ -291,16 +304,30 @@ namespace GodsGameApi
 		/// <returns>Список возможных состояний</returns>
 		public Dictionary<Movement, ClassicGameState> GetAllMovements(ClassicGameState source)
 		{
-			var result = new Dictionary<Movement, ClassicGameState>();
+			
 
 			bool lockTaken = false;
 			locker.Enter(ref lockTaken);
+			
 			if (lockTaken == false)
 				throw new SynchronizationLockException("");
 
-			InitializeRowsAndColumnsPoints(source.Board.Width, source.Board.Height);
+			if (NeedPointsInitialization(source.Board.Width, source.Board.Width))
+			{
+				if (rowsPoints == null)
+					InitializeRowsAndColumnsPoints(source.Board.Width, source.Board.Height);
+				else
+				{
+					// инициализированные значения могут быть нужны другим потокам
+					// поэтому мы не станем их менять
+					locker.Exit(true);
+					return new ClassicRules().GetAllMovements(source);
+				}
+			}
 
 			locker.Exit(true);
+
+			var result = new Dictionary<Movement, ClassicGameState>();
 
 			if (source.GameOver())
 			{
@@ -318,6 +345,7 @@ namespace GodsGameApi
 				AddExplosiveItemUsages(result, source, GetDynamitShape);
 
 			AddEmptyMovement(result, source);
+
 			return result;
 		}
 
