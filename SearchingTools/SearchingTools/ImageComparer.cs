@@ -5,8 +5,6 @@ namespace SearchingTools
 {
 	internal static class ImageComparer
 	{
-		//private static double power = 2;
-
 		/// <summary>
 		/// Подсчитывает среднеквадратичное отклонение по каждому компоненту RGB.
 		/// </summary>
@@ -19,24 +17,32 @@ namespace SearchingTools
 		{
 			int red = 0, green = 0, blue = 0;
 			int uncounted = 0;
-			for (int dx = 0; dx < template.GetLength(0); ++dx)
-				for (int dy = 0; dy < template[0].GetLength(0); ++dy)
-				{
-					var imagePointColor = image[imageStart.X + dx][imageStart.Y + dy];
-					var templatePointColor = template[dx][dy];
-					if (reservedColor == templatePointColor)
+			int width = template.GetLength(0);
+			int height = template[0].GetLength(0);
+			
+			for (int dx = 0; dx < width; ++dx)
+				for (int dy = 0; dy < height; ++dy)
+				{	
+					var templateColor = template[dx][dy];
+					
+					if (reservedColor == templateColor)
 					{
 						++uncounted;
 						continue;
 					}
-					var dR = imagePointColor.R - templatePointColor.R;
-					var dG = imagePointColor.G - templatePointColor.G;
-					var dB = imagePointColor.B - templatePointColor.B;
+
+					var imageColor = image[imageStart.X + dx][imageStart.Y + dy];
+
+					var dR = imageColor.R - templateColor.R;
+					var dG = imageColor.G - templateColor.G;
+					var dB = imageColor.B - templateColor.B;
+					
 					red += dR * dR;
 					green += dG * dG;
 					blue += dB * dB;
 				}
-			int totalPoints = template.GetLength(0) * template[0].GetLength(0) - uncounted;
+
+			var totalPoints = width * height - uncounted;
 			return GetResultSimpleColor(red, green, blue, totalPoints);
 		}
 
@@ -44,10 +50,11 @@ namespace SearchingTools
 		{
 			if (object.ReferenceEquals(left, right))
 				return true;
-			int width = left.Length;
-			int heigth = left[0].Length;
+			
+			int width = Width(left);
+			int heigth = Height(left);
 
-			if (width != right.Length || heigth != right[0].Length)
+			if (width != Width(right) || heigth != Height(right))
 				return false;
 
 			for (int x = 0; x < width; ++x)
@@ -82,8 +89,7 @@ namespace SearchingTools
 
 		private static byte NormalizeColorComponent(double simpleColorComponent)
 		{
-			//simpleColorComponent = Math.Pow(simpleColorComponent, 1.0 / 3);
-			simpleColorComponent = Math.Round(simpleColorComponent);
+			simpleColorComponent = Math.Ceiling(simpleColorComponent);
 			simpleColorComponent = Math.Max(simpleColorComponent, 0);
 			simpleColorComponent = Math.Min(simpleColorComponent, byte.MaxValue);
 			return (byte)simpleColorComponent;
@@ -93,16 +99,26 @@ namespace SearchingTools
 		/// Сопоставляет с шаблоном часть изображения
 		/// </summary>
 		/// <param name="image">Изображение, часть которого будет сопоставляться с шаблоном</param>
-		/// <param name="imageStartPoint">Левая верхняя сопоставляемая точка изображения</param>
+		/// <param name="imageStart">Левая верхняя сопоставляемая точка изображения</param>
 		/// <param name="template">Сопоставляемый шаблон</param>
 		/// <param name="reservedColor">Не учитываемый цвет в шаблоне</param>
 		/// <param name="admissibleDifference">Содержит максимальные допустимые отклонения</param>
 		/// <returns>Результат сравнения</returns>
-		public static bool Equals(SimpleColor[][] image, Point imageStartPoint, 
+		public static bool Equals(SimpleColor[][] image, Point imageStart, 
 			SimpleColor[][] template, SimpleColor reservedColor, SimpleColor admissibleDifference)
 		{
-			SimpleColor diff = CalculateDifference(image, imageStartPoint, template, reservedColor);
+			SimpleColor diff = CalculateDifference(image, imageStart, template, reservedColor);
 			return (diff.R <= admissibleDifference.R && diff.G <= admissibleDifference.G && diff.B <= admissibleDifference.B);
+		}
+
+		public static int Width(SimpleColor[][] image)
+		{
+			return image.Length;
+		}
+
+		public static int Height(SimpleColor[][] image)
+		{
+			return image[0].Length;
 		}
 	}
 }
