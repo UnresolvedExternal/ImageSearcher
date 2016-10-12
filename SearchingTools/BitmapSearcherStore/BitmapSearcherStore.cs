@@ -78,7 +78,7 @@ namespace SearchingTools
 		{
 			lock (locker)
 			{
-				return simpleStore[id].GetAdmissibleDifferences();
+				return simpleStore[id].GetAdmissibleDifference();
 			}
 		}
 
@@ -94,7 +94,7 @@ namespace SearchingTools
 			{
 				if (simpleStore.ContainsKey(id))
 					throw new InvalidOperationException("Object with the same id alredy exists");
-				var searcher = new BitmapSearcher(template);
+				var searcher = new BitmapSearcher(template, SimpleColor.FromRgb(0, 0, 0));
 				simpleStore[id] = searcher;
 			}
 		}
@@ -134,7 +134,7 @@ namespace SearchingTools
 
 				lock (locker)
 				{
-					simpleStore[id].Upgrade(newSearcher);
+					simpleStore[id].UniteWith(newSearcher);
 					tasksRunning--;
 				}
 			};

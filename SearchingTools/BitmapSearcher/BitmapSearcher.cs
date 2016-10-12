@@ -20,9 +20,9 @@ namespace SearchingTools
 		[DataMember]
 		private ImageSearcher searcher;
 
-		public BitmapSearcher(Bitmap template)
+		public BitmapSearcher(Bitmap template, SimpleColor transparentColor)
 		{
-			searcher = new ImageSearcher(Converter.ToMatrix(template), SimpleColor.FromRgb(0, 0, 0));
+			searcher = new ImageSearcher(Converter.ToMatrix(template), transparentColor);
 		}
 
 		public Bitmap GetTemplate()
@@ -34,11 +34,9 @@ namespace SearchingTools
 		{
 			using (var memory = new MemoryStream())
 			{
-				var xxx = new DataContractJsonSerializerSettings();
-				var formatter = new DataContractJsonSerializer(GetType());
-				formatter.WriteObject(memory, this);
+				SerializationHelper.Serialize(this, memory);
 				memory.Position = 0;
-				return (BitmapSearcher)formatter.ReadObject(memory);
+				return (BitmapSearcher)SerializationHelper.Deserialize(memory);
 			}
 		}
 
@@ -61,13 +59,11 @@ namespace SearchingTools
 		/// <returns>Список совпадений - координаты самого верхнего-левого пиксела в каждом совпадении</returns>
 		public IEnumerable<Point> GetPositions(Bitmap image)
 		{
-			if (object.ReferenceEquals(image, null))
-				throw new ArgumentException("image is null");
 			return searcher.GetPositions(Converter.ToMatrix(image));
 		}
 
 		/// <summary>
-		/// Загружает из потока объект SearchingTools, сохранённый при помощи метода Save.
+		/// Загружает из потока объект BitmapSearcher, сохранённый при помощи метода Save.
 		/// </summary>
 		public static BitmapSearcher Load(Stream input)
 		{
@@ -79,22 +75,22 @@ namespace SearchingTools
 			SerializationHelper.Serialize(this, output);
 		}
 
-		public int TemplateWidth { get { return searcher.TemplateWidth; } }
-		public int TemplateHeight { get { return searcher.TemplateHeight; } }
+		public int TemplateWidth { get { return searcher.GetTemplate().Length; } }
+		public int TemplateHeight { get { return searcher.GetTemplate()[0].Length; } }
 		public Size TemplateSize { get { return new Size(TemplateWidth, TemplateHeight); } }
 
-		public SimpleColor GetAdmissibleDifferences()
+		public SimpleColor GetAdmissibleDifference()
 		{
-			return searcher.GetAdmissibleDifferences();
+			return searcher.GetAdmissibleDifference();
 		}
 
 		/// <summary>
 		/// Объединяет поисковики, представляющие одинаковые шаблоны
 		/// </summary>
-		/// <param name="newSearcher"></param>
-		public void Upgrade(BitmapSearcher newSearcher)
+		/// <param name="other"></param>
+		public void UniteWith(BitmapSearcher other)
 		{
-			newSearcher.searcher.UpgradeThisAndOther(this.searcher);
+			this.searcher.UniteWith(other.searcher);
 		}
 	}
 }

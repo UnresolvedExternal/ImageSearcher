@@ -29,7 +29,7 @@ namespace SearchingTools
 		private BitmapSearcher CreateAndLearnSearcher(Action<BitmapSearcher> afterTune = null)
 		{
 			var template = Image.FromFile(Path.Combine(LearnFolder, "template.bmp")) as Bitmap;
-			var g = new BitmapSearcher(template);
+			var g = new BitmapSearcher(template, SimpleColor.FromRgb(0, 0, 0));
 			Assert.AreEqual(template.Size, g.TemplateSize);
 			foreach (var filename in Directory.EnumerateFiles(LearnFolder).Where(f => !f.EndsWith("template.bmp")))
 			{

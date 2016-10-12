@@ -9,19 +9,20 @@ using System.Threading.Tasks;
 
 namespace SearchingTools
 {
+	/// <summary>
+	/// Allows to search items on an image which match template.
+	/// Supports decreasing strictness of comparison.
+	/// </summary>
 	[Serializable]
     public class ImageSearcher
     {
-		private static readonly int smallPictureWidth = 2;
-		private static readonly int smallPictureHeight = 2;
-
-		private SimpleColor[][] template;
-		public int TemplateWidth { get { return template.Length; } }
-		public int TemplateHeight { get { return template[0].Length; } }
+		private static readonly int smallTemplateWidth = 2;
+		private static readonly int smallTemplateHeight = 2;
 
 		// Part of template, witch is using as a first filter (in order to increase performance)
 		private SimpleColor[][] smallPictureTemplate;
 
+		private SimpleColor[][] template;
 		private SimpleColor maxDifference;
 		private SimpleColor smallPictureMaxDifference;
 		
@@ -31,9 +32,10 @@ namespace SearchingTools
 		private SimpleColor reservedColor;
 
 		// A simple comparator for any reason
-		private static int Compare(SimpleColor first, SimpleColor second)
+		private static int Compare(SimpleColor leftDifference, SimpleColor rightDifference)
 		{
-			return (first.R + first.G + first.B).CompareTo(second.R + second.G + second.B);
+			return (leftDifference.R + leftDifference.G + leftDifference.B)
+				.CompareTo(rightDifference.R + rightDifference.G + rightDifference.B);
 		}
 
 		public SimpleColor[][] GetTemplate()
@@ -41,26 +43,28 @@ namespace SearchingTools
 			return template;
 		}
 
+		/// <param name="template"></param>
+		/// <param name="reservedColor">Points in template which match reservedColor are considered transparent</param>
 		public ImageSearcher(SimpleColor[][] template, SimpleColor reservedColor)
 		{
-			if (template.GetLength(0) <= smallPictureWidth || template[0].GetLength(0) <= smallPictureHeight)
+			if (template.GetLength(0) <= smallTemplateWidth || template[0].GetLength(0) <= smallTemplateHeight)
 				throw new ArgumentException(
 					string.Format("To small size of template. Required at least: width = {0}, height = {1}", 
-						smallPictureWidth + 1, smallPictureHeight + 1));
+						smallTemplateWidth + 1, smallTemplateHeight + 1));
 						
 			this.template = template;
 			this.reservedColor = reservedColor;
-			
 			InitializeSmallPictureTemplate();
 		}
 
-		// Middle subregion of template
+		/// <summary>
+		/// Initialize small picture subregion
+		/// </summary>
 		private void InitializeSmallPictureTemplate()
 		{
-			int left = (template.GetLength(0) - smallPictureWidth) / 2;
-			int top = (template[0].GetLength(0) - smallPictureHeight) / 2;
-			
-			smallPictureRegion = new Rectangle(left, top, smallPictureWidth, smallPictureHeight);
+			int left = (template.GetLength(0) - smallTemplateWidth) / 2;
+			int top = (template[0].GetLength(0) - smallTemplateHeight) / 2;
+			smallPictureRegion = new Rectangle(left, top, smallTemplateWidth, smallTemplateHeight);
 			
 			smallPictureTemplate = ImageConverter.CreateMatrix<SimpleColor>(smallPictureRegion.Width, 
 				smallPictureRegion.Height);
@@ -77,11 +81,11 @@ namespace SearchingTools
 		{
 			int maxX = source.GetLength(0) - template.GetLength(0);
 			int maxY = source[0].GetLength(0) - template[0].GetLength(0);
-			var lists = new List<Point>[maxX];
+			var verticals = new List<Point>[maxX];
 
 			Parallel.For(0, maxX, x =>
 				{
-					lists[x] = new List<Point>();
+					verticals[x] = new List<Point>();
 					for (int y = 0; y < maxY; ++y)
 					{
 						if (ImageComparer.Equals(
@@ -91,16 +95,21 @@ namespace SearchingTools
 							reservedColor,
 							smallPictureMaxDifference))
 						{
-							lists[x].Add(new Point(x, y));
+							verticals[x].Add(new Point(x, y));
 						}
 					}
 				});
 
 			for (int x = 0; x < maxX; ++x)
-				foreach (var p in lists[x])
+				foreach (var p in verticals[x])
 					yield return p;
 		}
 
+		/// <summary>
+		/// Searches for subpictures that match template
+		/// </summary>
+		/// <param name="source"></param>
+		/// <returns></returns>
 		public IEnumerable<Point> GetPositions(SimpleColor[][] source)
 		{
 			var smallPicturePositions = GetSmallPicturePositions(source);
@@ -121,71 +130,49 @@ namespace SearchingTools
 		}
 
 		/// <summary>
-		/// Finds .bmp files in given directory. (Each .bmp filename must consists of a number - how much positions
-		/// are satisfied to template. According to image and this info, this method sets maximal admissible
-		/// differences of RGB components.
+		/// Updates maximal admissible differences
 		/// </summary>
-		public void Learn(string directory)
+		/// <param name="image"></param>
+		/// <param name="elements">Count of elements on the image that should match template</param>
+		public void Learn(SimpleColor[][] image, int elements)
 		{
-			this.maxDifference = SimpleColor.FromRgb(0, 0, 0);
-			this.smallPictureMaxDifference = SimpleColor.FromRgb(0, 0, 0);
-			
-			foreach (var filename in Directory.GetFiles(directory).Where(name => name.ToUpper().EndsWith(".BMP")))
-			{
-				Bitmap source = Image.FromFile(filename) as Bitmap;
-				var name = Path.GetFileName(filename);
-				var number = Regex.Match(name, @"\d+");
-				int value = int.Parse(number.Value);
-				Learn(ImageConverter.ToMatrix(source), value);
-			}
-		}
-
-		/// <summary>
-		/// Updates maximal admissible differences.
-		/// </summary>
-		public void Learn(SimpleColor[][] sourceMatrix, int elementsCount)
-		{
-			SimpleColor[] minValues = 
-				Enumerable.Repeat(SimpleColor.FromRgb(byte.MaxValue, byte.MaxValue, byte.MaxValue), elementsCount).ToArray();
+			SimpleColor[] minDifferences = Enumerable
+				.Repeat(SimpleColor.FromRgb(byte.MaxValue, byte.MaxValue, byte.MaxValue), elements)
+				.ToArray();
 				
-			Point[] positions = new Point[elementsCount];
+			Point[] positions = new Point[elements];
 			
-			int maxX = sourceMatrix.GetLength(0) - template.GetLength(0) + 1;
-			int maxY = sourceMatrix[0].GetLength(0) - template[0].GetLength(0) + 1;
+			int maxX = image.GetLength(0) - template.GetLength(0) + 1;
+			int maxY = image[0].GetLength(0) - template[0].GetLength(0) + 1;
 			
 			for (int x = 0; x < maxX; ++x)
 				for (int y = 0; y < maxY; ++y)
 				{
 					SimpleColor diff = ImageComparer.CalculateDifference(
-						sourceMatrix,
+						image,
 						new Point(x, y),
 						template,
-						SimpleColor.FromRgb(0, 0, 0));
-					SmartInsert(minValues, positions, diff, new Point(x, y));
+						reservedColor);
+
+					SmartInsert(minDifferences, positions, diff, new Point(x, y));
 				}
 				
-			UpdateMaxDifference(minValues);
-			ModifySmallPictureMaxDifference(sourceMatrix, positions);
+			UpdateAdmissibleDifference(minDifferences);
+			UpdateAdmissibleDifferenceForSmallTemplate(image, positions);
 		}
 
-		private void UpdateMaxDifference(SimpleColor[] minValues)
+		private void UpdateAdmissibleDifference(SimpleColor[] differences)
 		{
-			byte[] newDiff = new[] { this.maxDifference.R, this.maxDifference.G, this.maxDifference.B };
-			
-			foreach (var color in minValues)
+			foreach (var difference in differences)
 			{
-				newDiff[0] = Math.Max(newDiff[0], color.R);
-				newDiff[1] = Math.Max(newDiff[1], color.G);
-				newDiff[2] = Math.Max(newDiff[2], color.B);
+				maxDifference.R = Math.Max(maxDifference.R, difference.R);
+				maxDifference.G = Math.Max(maxDifference.G, difference.G);
+				maxDifference.B = Math.Max(maxDifference.B, difference.B);
 			}
-			
-			this.maxDifference = SimpleColor.FromRgb(newDiff[0], newDiff[1], newDiff[2]);
 		}
 
-		private void ModifySmallPictureMaxDifference(SimpleColor[][] sourceMatrix, Point[] positions)
+		private void UpdateAdmissibleDifferenceForSmallTemplate(SimpleColor[][] sourceMatrix, Point[] positions)
 		{
-			byte[] newDiff = new[] { this.smallPictureMaxDifference.R, this.smallPictureMaxDifference.G, this.smallPictureMaxDifference.B };
-			
 			foreach (var position in positions)
 			{
 				SimpleColor simpleColor = ImageComparer.CalculateDifference(
@@ -193,12 +180,11 @@ namespace SearchingTools
 						new Point(position.X + smallPictureRegion.Left, position.Y + smallPictureRegion.Top),
 						smallPictureTemplate,
 						reservedColor);
-				newDiff[0] = Math.Max(newDiff[0], simpleColor.R);
-				newDiff[1] = Math.Max(newDiff[1], simpleColor.G);
-				newDiff[2] = Math.Max(newDiff[2], simpleColor.B);
+
+				smallPictureMaxDifference.R = Math.Max(smallPictureMaxDifference.R, simpleColor.R);
+				smallPictureMaxDifference.G = Math.Max(smallPictureMaxDifference.G, simpleColor.G);
+				smallPictureMaxDifference.B = Math.Max(smallPictureMaxDifference.B, simpleColor.B);
 			}
-			
-			this.smallPictureMaxDifference = SimpleColor.FromRgb(newDiff[0], newDiff[1], newDiff[2]);
 		}
 
 		private static void SmartInsert(SimpleColor[] minValues, Point[] positions, SimpleColor value, Point pos)
@@ -216,7 +202,7 @@ namespace SearchingTools
 			}
 		}
 
-		public SimpleColor GetAdmissibleDifferences()
+		public SimpleColor GetAdmissibleDifference()
 		{
 			return maxDifference;
 		}
@@ -226,20 +212,25 @@ namespace SearchingTools
 			return ImageComparer.Equals(GetTemplate(), other.GetTemplate());
 		}
 
-		public void UpgradeThisAndOther(ImageSearcher other)
+		/// <summary>
+		/// Unite .Learn() results for this and another searchers which represent
+		/// same templates
+		/// </summary>
+		/// <param name="other"></param>
+		public void UniteWith(ImageSearcher other)
 		{
 			if (!TemplatesEqual(other))
-				throw new InvalidOperationException("Объекты представляют разные шаблоны");
-			UniteDifferences(ref maxDifference, ref other.maxDifference);
-			UniteDifferences(ref smallPictureMaxDifference, ref other.smallPictureMaxDifference);
+				throw new InvalidOperationException("Objects represent different templates");
+
+			UniteDifferences(ref maxDifference, other.maxDifference);
+			UniteDifferences(ref smallPictureMaxDifference, other.smallPictureMaxDifference);
 		}
 
-		private static void UniteDifferences(ref SimpleColor left, ref SimpleColor right)
+		private static void UniteDifferences(ref SimpleColor left, SimpleColor right)
 		{
 			left.R = Math.Max(left.R, right.R);
 			left.G = Math.Max(left.G, right.G);
 			left.B = Math.Max(left.B, right.B);
-			right = left;
 		}
 	}
 }
