@@ -34,7 +34,7 @@ namespace SearchingTools
 			{
 				var bmp = Image.FromFile(filename) as Bitmap;
 				var numberOfItems = int.Parse(Regex.Match(filename, @"\d+").Value);
-				g.Tune(bmp, numberOfItems);
+				g.Learn(bmp, numberOfItems);
 				if (afterTune != null)
 					afterTune(g);
 			}

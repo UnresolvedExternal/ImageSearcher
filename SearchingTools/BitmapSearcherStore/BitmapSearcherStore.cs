@@ -130,7 +130,7 @@ namespace SearchingTools
 				}
 
 				// Затратная операция не запирает хранилище
-				newSearcher.Tune(image, count);
+				newSearcher.Learn(image, count);
 
 				lock (locker)
 				{

@@ -41,11 +41,11 @@ namespace SearchingTools
 		}
 
 		/// <summary>
-		/// При необходимости настраивает допустимые отклонения от шаблона. (в сторону увеличения допустимых отклонений)
+		/// При необходимости увеличивает допустимые отклонения от шаблона. (в сторону увеличения допустимых отклонений)
 		/// </summary>
 		/// <param name="image">Некоторое изображение</param>
 		/// <param name="templateCount">Количество ожидаемых совпадений с шаблоном в image</param>
-		public void Tune(Bitmap image, int templateCount)
+		public void Learn(Bitmap image, int templateCount)
 		{
 			if (templateCount <= 0 || object.ReferenceEquals(image, null))
 				throw new ArgumentException("image was null or templateCount <= 0");
@@ -85,7 +85,7 @@ namespace SearchingTools
 		}
 
 		/// <summary>
-		/// Объединяет поисковики, представляющие одинаковые шаблоны
+		/// Объединяет результаты обучения объектов. Результат сохраняет в текущий объект.
 		/// </summary>
 		/// <param name="other"></param>
 		public void UniteWith(BitmapSearcher other)
