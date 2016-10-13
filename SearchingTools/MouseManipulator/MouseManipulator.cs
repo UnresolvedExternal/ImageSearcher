@@ -7,6 +7,9 @@ namespace MouseManipulator
 {
 	public static class Mouse
 	{
+		/// <summary>
+		/// You may lock it to be confident of no uses of this class in other threads
+		/// </summary>
 		public static object Locker = new object();
 
 		[DllImport("user32.dll")]
@@ -34,12 +37,6 @@ namespace MouseManipulator
 		public static void Move(int x, int y)
 		{
 			Cursor.Position = new System.Drawing.Point(x, y);
-			/*
-			mouse_event((int)(MouseEventFlags.MOVE | MouseEventFlags.ABSOLUTE), 
-				(int)(x / (double)Screen.PrimaryScreen.Bounds.Width * 65536), 
-				(int)(y / (double)Screen.PrimaryScreen.Bounds.Width * 65536), 
-				0, 0);
-			 */
 		}
 
 		public static void Move(Point position)
