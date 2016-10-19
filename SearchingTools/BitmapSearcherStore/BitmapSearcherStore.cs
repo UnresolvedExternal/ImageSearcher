@@ -19,8 +19,8 @@ namespace SearchingTools
 		private int tasksRunning = 0;
 		public int TasksRunning
 		{
-			get { return tasksRunning; }
-			private set { tasksRunning = value; }
+			get { lock (locker) return tasksRunning; }
+			private set { lock (locker) tasksRunning = value; }
 		}
 
 		public int Count 
@@ -131,7 +131,6 @@ namespace SearchingTools
 
 				// Затратная операция не запирает хранилище
 				newSearcher.Learn(image, count);
-
 				lock (locker)
 				{
 					simpleStore[id].UniteWith(newSearcher);
