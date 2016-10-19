@@ -7,11 +7,6 @@ namespace MouseManipulator
 {
 	public static class Mouse
 	{
-		/// <summary>
-		/// You may lock it to be confident of no uses of this class in other threads
-		/// </summary>
-		public static object Locker = new object();
-
 		[DllImport("user32.dll")]
 		static extern void mouse_event(int dwFlags, int dx, int dy, int dwData, int dwExtraInfo);
 
