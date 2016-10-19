@@ -2,7 +2,7 @@
 
 UI for control of set of image patterns. API for searching subpictures.
 
-Example of usage
+Example of usage:
 ````csharp
 void PrintBananasPositions(Bitmap plentyOfFruits)
 {
