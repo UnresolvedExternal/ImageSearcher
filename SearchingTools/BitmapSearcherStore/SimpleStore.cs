@@ -10,7 +10,6 @@ namespace SearchingTools
 {
 	/// <summary>
 	/// Хранилище пар: ИД шаблона, поисковик
-	/// 
 	/// </summary>
 	[Serializable]
     internal sealed class SimpleStore: 
@@ -20,10 +19,6 @@ namespace SearchingTools
 		private static DataContractJsonSerializer formatter =
 			new DataContractJsonSerializer(typeof(SimpleStore));
 		 
-		/*
-		private static BinaryFormatter formatter = new BinaryFormatter(null, 
-			new System.Runtime.Serialization.StreamingContext(System.Runtime.Serialization.StreamingContextStates.File));
-		*/
 		public static SimpleStore Load(string filename)
 		{
 			SimpleStore store;
@@ -35,15 +30,7 @@ namespace SearchingTools
 					store = (SimpleStore)formatter.ReadObject(zip);
 				return store;
 			} 
-			catch (System.Runtime.Serialization.SerializationException e)
-			{
-				throw GetCorruptedFileException(e);
-			}
-			catch (System.IO.IOException e)
-			{
-				throw GetCorruptedFileException(e);
-			}
-			catch (InvalidDataException e)
+			catch (Exception e)
 			{
 				throw GetCorruptedFileException(e);
 			}
@@ -52,7 +39,7 @@ namespace SearchingTools
 		private static IOException GetCorruptedFileException(Exception inner)
 		{
 			if (inner.GetType() == typeof(System.IO.FileNotFoundException))
-				return new System.IO.FileNotFoundException("File not found");
+				return new System.IO.FileNotFoundException("File not found", inner);
 			return new System.IO.FileLoadException("The file is corrupted", inner);
 		}
 
