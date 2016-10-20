@@ -10,7 +10,7 @@ namespace SearchingTools
 {
 	/// <summary>
 	/// Хранилище объектов BitmapSearcher, доступных по строковым id
-	/// Поддерживает асинхроннные операции с элементами
+	/// Поддерживает асинхроннные операции с элементами и потокобезопасен
 	/// </summary>
 	public sealed class BitmapSearcherStore
 	{
@@ -27,7 +27,6 @@ namespace SearchingTools
 		{
 			get { lock (locker) { return simpleStore.Count; } } 
 		}
-		
 
 		private SimpleStore simpleStore = new SimpleStore();
 
@@ -131,6 +130,7 @@ namespace SearchingTools
 
 				// Затратная операция не запирает хранилище
 				newSearcher.Learn(image, count);
+
 				lock (locker)
 				{
 					simpleStore[id].UniteWith(newSearcher);
@@ -163,7 +163,8 @@ namespace SearchingTools
 			var needRemove = new List<bool>(Enumerable.Repeat(false, positions.Count));
 
 			for (int i = 1; i < positions.Count; ++i)
-				needRemove[i] = AreOverlapped(positions[i-1], positions[i], templateSize);
+				for (int j = 0; j < i; ++j)
+					needRemove[i] = AreOverlapped(positions[j], positions[i], templateSize);
 
 			var result = new List<Point>();
 			for (int i = 0; i < positions.Count; ++i)
