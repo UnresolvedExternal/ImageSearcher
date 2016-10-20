@@ -13,7 +13,7 @@ namespace SearchingTools
 	/// </summary>
 	[Serializable]
     internal sealed class SimpleStore: 
-		Dictionary<string, BitmapSearcher>
+		Dictionary<string, ConcurrentSearcher>
     {
 		
 		private static DataContractJsonSerializer formatter =

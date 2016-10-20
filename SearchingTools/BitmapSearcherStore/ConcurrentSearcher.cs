@@ -46,7 +46,7 @@ namespace SearchingTools
 		/// <param name="image"></param>
 		/// <param name="count"></param>
 		/// <returns></returns>
-		public async void LearnAsync(Bitmap image, int count)
+		public async Task LearnAsync(Bitmap image, int count)
 		{
 			Task task;
 			lock (_locker)

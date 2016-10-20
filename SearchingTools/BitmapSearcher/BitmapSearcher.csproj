@@ -69,7 +69,6 @@
   <ItemGroup>
     <Compile Include="BitmapSearcher.cs" />
     <Compile Include="SerializationHelper.cs" />
-    <Compile Include="SimpleTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

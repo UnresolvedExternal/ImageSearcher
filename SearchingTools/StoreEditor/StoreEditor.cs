@@ -311,12 +311,15 @@ namespace StoreEditor
 		private void removeTemplateButton_Click(object sender, EventArgs e)
 		{
 			var id = this.templateNamesListBox.Text;
-			if (!store.Remove(id))
-				MessageBox.Show(needValidId);
-			else
-			{
+			try
+			{ 
+				store.Remove(id);
 				saved = false;
 				UpdateTemplateNamesListBox();
+			}
+			catch (KeyNotFoundException)
+			{
+				MessageBox.Show(needValidId);
 			}
 		}
 

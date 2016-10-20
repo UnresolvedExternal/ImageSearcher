@@ -55,13 +55,11 @@ namespace SearchingTools
 			}
 		}
 
-		public bool Remove(string id)
+		public void Remove(string id)
 		{
 			lock (locker)
 			{
-				if (tasksRunning > 0)
-					return false;
-				return simpleStore.Remove(id);
+				simpleStore.Remove(id);
 			}
 		}
 
@@ -69,7 +67,7 @@ namespace SearchingTools
 		{
 			lock (locker)
 			{
-				return simpleStore[id].GetTemplate();
+				return simpleStore[id].GetLastVersion().GetTemplate();
 			}
 		}
 
@@ -77,12 +75,11 @@ namespace SearchingTools
 		{
 			lock (locker)
 			{
-				return simpleStore[id].GetAdmissibleDifference();
+				return simpleStore[id].GetLastVersion().GetAdmissibleDifference();
 			}
 		}
 
 		/// <summary>
-		/// 
 		/// </summary>
 		/// <param name="id"></param>
 		/// <param name="template"></param>
@@ -94,7 +91,7 @@ namespace SearchingTools
 				if (simpleStore.ContainsKey(id))
 					throw new InvalidOperationException("Object with the same id alredy exists");
 				var searcher = new BitmapSearcher(template, SimpleColor.FromRgb(0, 0, 0));
-				simpleStore[id] = searcher;
+				simpleStore[id] = new ConcurrentSearcher(searcher);
 			}
 		}
 
@@ -103,7 +100,7 @@ namespace SearchingTools
 			lock (locker)
 			{
 				if (!simpleStore.Keys.Contains(id))
-					throw new InvalidOperationException("Object with this id doesn't exist");
+					throw new KeyNotFoundException("Object with this id doesn't exist");
 			}
 		}
 
@@ -114,31 +111,18 @@ namespace SearchingTools
 		/// <param name="image"></param>
 		/// <param name="count"></param>
 		/// <returns></returns>
-		public Task UpgradeAsync(string id, Bitmap image, int count)
+		public async Task UpgradeAsync(string id, Bitmap image, int count)
 		{
-			ThrowIfIdDoesntExist(id);
-
-			Action upgrade = () =>
+			ConcurrentSearcher cs;
+			lock (locker)
 			{
-				BitmapSearcher newSearcher;
-				lock (locker)
-				{
-					ThrowIfIdDoesntExist(id);
-					tasksRunning++;
-					newSearcher = simpleStore[id].DeepClone();
-				}
+				ThrowIfIdDoesntExist(id);
+				cs = simpleStore[id];
+			}
 
-				// Затратная операция не запирает хранилище
-				newSearcher.Learn(image, count);
-
-				lock (locker)
-				{
-					simpleStore[id].UniteWith(newSearcher);
-					tasksRunning--;
-				}
-			};
-
-			return Task.Run(upgrade);
+			Interlocked.Increment(ref tasksRunning);
+			await cs.LearnAsync(image, count);
+			Interlocked.Decrement(ref tasksRunning);
 		}
 
 		public List<Point> GetPositions(string id, Bitmap image, bool noOverlapping = false)
@@ -148,8 +132,8 @@ namespace SearchingTools
 			lock (locker)
 			{
 				ThrowIfIdDoesntExist(id);
-				positions = simpleStore[id].GetPositions(image).ToList();
-				templateSize = simpleStore[id].TemplateSize;
+				positions = simpleStore[id].GetLastVersion().GetPositions(image).ToList();
+				templateSize = simpleStore[id].GetLastVersion().TemplateSize;
 			}
 
 			if (noOverlapping)
