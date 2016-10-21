@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,10 +11,14 @@ namespace SearchingTools
 	/// <summary>
 	/// Потокобезопасная оболочка для BitmapSearcher
 	/// </summary>
+	[DataContract]
 	internal class ConcurrentSearcher
 	{
+		[DataMember]
 		BitmapSearcher _lastVersion;
+		[DataMember]
 		object _locker;
+		[DataMember]
 		Task _task;
 
 		public ConcurrentSearcher(BitmapSearcher searcher)
