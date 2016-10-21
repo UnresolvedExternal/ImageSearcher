@@ -16,7 +16,20 @@ namespace StoreEditor
 		}
 
 		BitmapSearcherStore _store;
+
 		int _tasksRunning;
+		int _TasksRunning
+		{
+			get
+			{
+				return _tasksRunning;
+			}
+			set
+			{
+				_tasksRunning = value;
+				tasksCountLabel.Text = _tasksRunning.ToString();
+			}
+		}
 		bool _changed;
 
 		static string STORE_EXTENSION = ".store";
@@ -28,7 +41,7 @@ namespace StoreEditor
 			this.MinimumSize = this.Size;
 
 			_store = new BitmapSearcherStore();
-			_tasksRunning = 0;
+			_TasksRunning = 0;
 			_changed = false;
 		}
 
@@ -39,11 +52,10 @@ namespace StoreEditor
 			list.Items.Clear();
 			foreach (var id in _store.Keys.OrderBy(x => x))
 				list.Items.Add(id);
-			if (selectedItem == null)
+			if (selectedItem == null || list.Items.IndexOf(selectedItem) == -1)
 				list.SelectedIndex = list.Items.Count == 0 ? -1 : 0;
 			else
 				list.SelectedIndex = list.Items.IndexOf(selectedItem);
-			tasksCountLabel.Text = _tasksRunning.ToString();
 		}
 
 		private static DialogResult StartDialog(FileDialog dialog, string extension, string description)
@@ -207,9 +219,9 @@ namespace StoreEditor
 					};
 					new TextRequestForm(data).ShowDialog();
 					_changed = true;
-					++_tasksRunning;
+					++_TasksRunning;
 					await _store.UpgradeAsync((string)templateNamesListBox.SelectedItem, image, int.Parse(data.ResultText));
-					--_tasksRunning;
+					--_TasksRunning;
 					UpdateTemplateNamesListBox();
 				}
 				catch (Exception ex)
@@ -234,7 +246,11 @@ namespace StoreEditor
 			if (id == null)
 				MessageBox.Show("Select a template to remove", "Error");
 			else
+			{
+				_changed = true;
 				_store.Remove(id);
+				UpdateTemplateNamesListBox();
+			}
 		}
 
 		private void StoreEditor_FormClosing(object sender, FormClosingEventArgs e)

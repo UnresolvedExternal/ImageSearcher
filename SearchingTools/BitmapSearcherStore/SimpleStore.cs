@@ -10,10 +10,11 @@ namespace SearchingTools
 {
 	/// <summary>
 	/// Хранилище пар: ИД шаблона, поисковик
+	/// Эта версия класса не должна меняться в целях совместимости со старыми сохранениями
 	/// </summary>
 	[Serializable]
     internal sealed class SimpleStore: 
-		Dictionary<string, ConcurrentSearcher>
+		Dictionary<string, BitmapSearcher>
     {
 		
 		private static DataContractJsonSerializer formatter =

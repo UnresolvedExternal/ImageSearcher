@@ -49,8 +49,9 @@
   <ItemGroup>
     <Compile Include="BitmapSearcherStore.cs" />
     <Compile Include="ConcurrentSearcher.cs" />
-    <Compile Include="SimpleStore.cs" />
+    <Compile Include="SimpleStoreActual.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SimpleStore.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BitmapSearcher\BitmapSearcher.csproj">

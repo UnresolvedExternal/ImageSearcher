@@ -28,7 +28,7 @@ namespace SearchingTools
 			get { lock (locker) { return simpleStore.Count; } } 
 		}
 
-		private SimpleStore simpleStore = new SimpleStore();
+		private SimpleStoreActual simpleStore = new SimpleStoreActual();
 
 		public IEnumerable<string> Keys
 		{
@@ -43,7 +43,7 @@ namespace SearchingTools
 		public static BitmapSearcherStore Load(string path)
 		{
 			var store = new BitmapSearcherStore();
-			store.simpleStore = SimpleStore.Load(path);
+			store.simpleStore = SimpleStoreActual.Load(path);
 			return store;
 		}
 
