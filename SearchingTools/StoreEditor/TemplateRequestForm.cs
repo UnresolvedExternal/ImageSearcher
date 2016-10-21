@@ -24,6 +24,7 @@ namespace StoreEditor
 
 			data.ResultText = data.InitialText ?? "";
 			this.textBox1.Text = data.ResultText;
+			this.textBox1.SelectAll();
 
 			var btn = new Button();
 			this.AcceptButton = btn;

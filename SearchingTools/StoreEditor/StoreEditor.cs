@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using SearchingTools;
 
@@ -47,15 +48,24 @@ namespace StoreEditor
 
 		private void UpdateTemplateNamesListBox()
 		{
-			var list = templateNamesListBox;
-			var selectedItem = list.SelectedItem;
+			var selectedItem = templateNamesListBox.SelectedItem;
+			Populate(templateNamesListBox);
+			InitializeSelectedIndex(templateNamesListBox, selectedItem);
+		}
+
+		private static void InitializeSelectedIndex(ListBox list, object previousSelected)
+		{
+			if (previousSelected == null || list.Items.IndexOf(previousSelected) == -1)
+				list.SelectedIndex = list.Items.Count == 0 ? -1 : 0;
+			else
+				list.SelectedIndex = list.Items.IndexOf(previousSelected);
+		}
+
+		private void Populate(ListBox list)
+		{
 			list.Items.Clear();
 			foreach (var id in _store.Keys.OrderBy(x => x))
 				list.Items.Add(id);
-			if (selectedItem == null || list.Items.IndexOf(selectedItem) == -1)
-				list.SelectedIndex = list.Items.Count == 0 ? -1 : 0;
-			else
-				list.SelectedIndex = list.Items.IndexOf(selectedItem);
 		}
 
 		private static DialogResult StartDialog(FileDialog dialog, string extension, string description)
@@ -99,21 +109,21 @@ namespace StoreEditor
 		{
 			var dialog = new OpenFileDialog();
 			var result = StartDialog(dialog, STORE_EXTENSION, "Store files");
-			switch (result)
+			if (result == DialogResult.OK)
+				ProcessLoad(dialog.FileName);
+		}
+
+		private void ProcessLoad(string filename)
+		{
+			try
 			{
-				case DialogResult.OK:
-					try
-					{
-						_store = BitmapSearcherStore.Load(dialog.FileName);
-						_changed = false;
-						UpdateTemplateNamesListBox();
-						return;
-					}
-					catch (Exception e)
-					{
-						MessageBox.Show(e.Message, "Unknown error");
-						return;
-					}
+				_store = BitmapSearcherStore.Load(filename);
+				_changed = false;
+				UpdateTemplateNamesListBox();
+			}
+			catch (Exception e)
+			{
+				MessageBox.Show(e.Message, "Unknown error");
 			}
 		}
 
@@ -136,7 +146,8 @@ namespace StoreEditor
 						return SaveResult.Cancelled;
 				}
 			}
-			return SaveResult.Rejected;
+			else
+				return SaveResult.Rejected;
 		}
 
 		private void createButton_Click(object sender, EventArgs e)
@@ -156,9 +167,7 @@ namespace StoreEditor
 		{
 			var result = AskAndSave();
 			if (result != SaveResult.Cancelled)
-			{
 				LoadStore();
-			}
 		}
 
 		private void saveButton_Click(object sender, EventArgs e)
@@ -172,63 +181,91 @@ namespace StoreEditor
 			dialog.Title = "Add template";
 			var result = StartDialog(dialog, IMAGE_EXTENSION, "Bitmap files");
 			if (result == DialogResult.OK)
+				ProcessAddTemplate(dialog.FileName);
+		}
+
+		private void ProcessAddTemplate(string filename)
+		{
+			try
 			{
-				try
-				{
-					var image = (Bitmap)Image.FromFile(dialog.FileName);
-					var data = new TextRequestData
-					{
-						InitialText = Path.GetFileNameWithoutExtension(dialog.FileName),
-						Title = "Enter template's name",
-						TextValidator = str => !_store.Keys.Contains(str.Trim())
-					};
-					new TextRequestForm(data).ShowDialog();
-					data.ResultText = data.ResultText.Trim();
-					_store.Add(data.ResultText, image);
-					_changed = true;
-					UpdateTemplateNamesListBox();
-				}
-				catch (Exception ex)
-				{
-					MessageBox.Show(ex.Message, "Unknown error");
-				}
+				var image = (Bitmap)Image.FromFile(filename);
+				var data = GetTemplateNameRequestData(filename);
+				new TextRequestForm(data).ShowDialog();
+				data.ResultText = data.ResultText.Trim();
+				_changed = true;
+				_store.Add(data.ResultText, image);
+				UpdateTemplateNamesListBox();
 			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(ex.Message, "Unknown error");
+			}
+		}
+
+		private TextRequestData GetTemplateNameRequestData(string filename)
+		{
+			var data = new TextRequestData
+			{
+				InitialText = Path.GetFileNameWithoutExtension(filename),
+				Title = "Enter template's name",
+				TextValidator = str => !_store.Keys.Contains(str.Trim())
+			};
+			return data;
 		}
 
 		private async void upgradeTemplateButton_Click(object sender, EventArgs e)
 		{
-			var dialog = new OpenFileDialog();
-			dialog.Title = "Upgrade template";
-			var result = StartDialog(dialog, IMAGE_EXTENSION, "Bitmap files");
-			if (result == DialogResult.OK)
+			if (templateNamesListBox.SelectedItem == null)
+				MessageBox.Show("Select a template to upgrade", "Error");
+			else
 			{
-				try
-				{
-					var image = (Bitmap)Image.FromFile(dialog.FileName);
-					var data = new TextRequestData
+				var dialog = new OpenFileDialog();
+				dialog.Title = "Upgrade template";
+				var result = StartDialog(dialog, IMAGE_EXTENSION, "Bitmap files");
+				if (result == DialogResult.OK)
+					try
 					{
-						InitialText = "1",
-						Title = "Enter number of elements the image consists of",
-						TextValidator = str =>
-							{
-								int num;
-								if (!int.TryParse(str, out num))
-									return false;
-								return num > 0;
-							}
-					};
-					new TextRequestForm(data).ShowDialog();
-					_changed = true;
-					++_TasksRunning;
-					await _store.UpgradeAsync((string)templateNamesListBox.SelectedItem, image, int.Parse(data.ResultText));
-					--_TasksRunning;
-					UpdateTemplateNamesListBox();
-				}
-				catch (Exception ex)
-				{
-					MessageBox.Show(ex.Message, "Unknown error");
-				}
+						await RunUpgrade(dialog.FileName);
+					}
+					catch (Exception ex)
+					{
+						MessageBox.Show(ex.Message, "Unknown error");
+					}
 			}
+		}
+
+		private async Task RunUpgrade(string filename)
+		{
+			var image = (Bitmap)Image.FromFile(filename);
+			var data = GetNumberRequestData();
+			new TextRequestForm(data).ShowDialog();
+			_changed = true;
+			++_TasksRunning;
+			try
+			{
+				await _store.UpgradeAsync((string)templateNamesListBox.SelectedItem, image, int.Parse(data.ResultText));
+			}
+			finally
+			{
+				--_TasksRunning;
+			}
+		}
+
+		private static TextRequestData GetNumberRequestData()
+		{
+			var data = new TextRequestData
+			{
+				InitialText = "1",
+				Title = "Enter number of elements the image consists of",
+				TextValidator = str =>
+				{
+					int num;
+					if (!int.TryParse(str, out num))
+						return false;
+					return num > 0;
+				}
+			};
+			return data;
 		}
 
 		private void viewTemplateButton_Click(object sender, EventArgs e)
@@ -242,13 +279,13 @@ namespace StoreEditor
 
 		private void removeTemplateButton_Click(object sender, EventArgs e)
 		{
-			string id = (string)templateNamesListBox.SelectedItem;
+			var id = templateNamesListBox.SelectedItem;
 			if (id == null)
 				MessageBox.Show("Select a template to remove", "Error");
 			else
 			{
 				_changed = true;
-				_store.Remove(id);
+				_store.Remove((string)id);
 				UpdateTemplateNamesListBox();
 			}
 		}
