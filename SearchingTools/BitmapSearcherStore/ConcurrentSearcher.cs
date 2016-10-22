@@ -42,7 +42,7 @@ namespace SearchingTools
 		public BitmapSearcher GetLastVersion()
 		{
 			lock (_locker)
-				return _lastVersion.DeepClone();
+				return _lastVersion.Clone();
 		}
 
 		/// <summary>

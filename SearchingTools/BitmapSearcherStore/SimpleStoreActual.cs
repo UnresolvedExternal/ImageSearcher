@@ -14,11 +14,6 @@ namespace SearchingTools
     internal sealed class SimpleStoreActual:
 		Dictionary<string, ConcurrentSearcher>
     {
-		public static SimpleStoreActual Load(string filename)
-		{
-			return (SimpleStoreActual)SimpleStore.Load(filename);
-		}
-
 		public static explicit operator SimpleStoreActual(SimpleStore data)
 		{
 			var result = new SimpleStoreActual();
@@ -35,9 +30,16 @@ namespace SearchingTools
 			return result;
 		}
 
+		/// <exception cref="System.IOException"></exception>
 		public void Save(string filename)
 		{
 			((SimpleStore)this).Save(filename);
+		}
+
+		/// <exception cref="System.IOException"></exception>
+		public static SimpleStoreActual Load(string filename)
+		{
+			return (SimpleStoreActual)SimpleStore.Load(filename);
 		}
     }
 }

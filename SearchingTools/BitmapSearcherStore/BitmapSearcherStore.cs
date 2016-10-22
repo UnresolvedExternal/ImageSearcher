@@ -35,10 +35,6 @@ namespace SearchingTools
 			get { lock (locker) { return simpleStore.Keys; } }
 		}
 
-		/// <summary>
-		/// </summary>
-		/// <param name="path"></param>
-		/// <returns></returns>
 		/// <exception cref="Sysem.IOException"></exception>
 		public static BitmapSearcherStore Load(string path)
 		{
@@ -47,6 +43,7 @@ namespace SearchingTools
 			return store;
 		}
 
+		/// <exception cref="Sysem.IOException"></exception>
 		public void Save(string path)
 		{
 			lock (locker)
@@ -79,10 +76,6 @@ namespace SearchingTools
 			}
 		}
 
-		/// <summary>
-		/// </summary>
-		/// <param name="id"></param>
-		/// <param name="template"></param>
 		/// <exception cref="System.InvalidOperationException"></exception>
 		public void Add(string id, Bitmap template)
 		{
@@ -107,10 +100,6 @@ namespace SearchingTools
 		/// <summary>
 		/// Адаптирует настройки поисковика при помощи изображения, содержащего count элементов
 		/// </summary>
-		/// <param name="id"></param>
-		/// <param name="image"></param>
-		/// <param name="count"></param>
-		/// <returns></returns>
 		public async Task UpgradeAsync(string id, Bitmap image, int count)
 		{
 			ConcurrentSearcher cs;

@@ -30,7 +30,7 @@ namespace SearchingTools
 			return Converter.ToBitmap(searcher.GetTemplate());
 		}
 
-		public BitmapSearcher DeepClone()
+		public BitmapSearcher Clone()
 		{
 			using (var memory = new MemoryStream())
 			{
