@@ -231,8 +231,6 @@ namespace SearchingTools
 			while (elementsLeft > 0)
 			{
 				var position = FindMin(differences, invalidRegions);
-				if (differences[position.X][position.Y] == (SimpleColor)Color.White)
-					throw new InvalidOperationException("Cant find all subpictures. State may be corrupted now.");
 				bestPositions[elementsLeft - 1] = position;
 				--elementsLeft;
 				invalidRegions.Add(new Rectangle(position, this.Size));
@@ -261,11 +259,21 @@ namespace SearchingTools
 						localMin = min;
 
 					for (int y = 0; y < height; ++y)
-						if (Compare(differences[x][y], localMin) < 0)
+					{
+						bool valid = true;
+						foreach (var r in invalidRegions)
+							if (Contains(r, x, y))
+							{
+								valid = false;
+								break;
+							}
+
+						if (valid && Compare(differences[x][y], localMin) < 0)
 						{
 							localMin = differences[x][y];
 							localPos.Y = y;
 						}
+					}
 
 					lock (locker)
 						if (Compare(localMin, min) < 0)
@@ -275,7 +283,17 @@ namespace SearchingTools
 						}
 				});
 
+			if (min == (SimpleColor)Color.White)
+				throw new InvalidOperationException("Cant find all subpictures. State may be corrupted now.");
 			return pos;
+		}
+
+		private bool Contains(Rectangle r, int x, int y)
+		{
+			return x >= r.Left &&
+				x < r.Right &&
+				y >= r.Top &&
+				y < r.Bottom;
 		}
 
 		private void UpdateAdmissibleDifference(SimpleColor[] differences)
