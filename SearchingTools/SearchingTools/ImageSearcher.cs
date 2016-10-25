@@ -31,12 +31,16 @@ namespace SearchingTools
 
 		private SimpleColor reservedColor;
 
-		// A simple comparator for any reason
+		// A simple comparator
 		private static int Compare(SimpleColor leftDifference, SimpleColor rightDifference)
 		{
 			return (leftDifference.R + leftDifference.G + leftDifference.B)
 				.CompareTo(rightDifference.R + rightDifference.G + rightDifference.B);
 		}
+
+		public int Width { get { return ImageComparer.Width(template); } }
+		public int Height { get { return ImageComparer.Height(template); } }
+		public Size Size { get { return new Size(Width, Height); } }
 
 		public SimpleColor[][] GetTemplate()
 		{
@@ -47,14 +51,42 @@ namespace SearchingTools
 		/// <param name="reservedColor">Points in template which match reservedColor are considered transparent</param>
 		public ImageSearcher(SimpleColor[][] template, SimpleColor reservedColor)
 		{
-			if (template.GetLength(0) <= smallTemplateWidth || template[0].GetLength(0) <= smallTemplateHeight)
-				throw new ArgumentException(
-					string.Format("To small size of template. Required at least: width = {0}, height = {1}", 
-						smallTemplateWidth + 1, smallTemplateHeight + 1));
-						
+			CheckSize(template);
+			CheckTransparentDistribution(template, reservedColor);
+
 			this.template = template;
 			this.reservedColor = reservedColor;
 			InitializeSmallPictureTemplate();
+		}
+
+		private static void CheckSize(SimpleColor[][] template)
+		{
+			if (template.GetLength(0) <= smallTemplateWidth || template[0].GetLength(0) <= smallTemplateHeight)
+				throw new ArgumentException(
+					string.Format("To small size of template. Required at least: width = {0}, height = {1}",
+						smallTemplateWidth, smallTemplateHeight));
+		}
+
+		private static void CheckTransparentDistribution(SimpleColor[][] template, SimpleColor transparent)
+		{
+			int width = ImageComparer.Width(template);
+			int height = ImageComparer.Height(template);
+
+			for (int x = 0; x < width; ++x)
+				if (template[x][0] == transparent || template[x][height - 1] == transparent)
+					throw BadTransparentDistribution;
+
+			for (int y = 0; y < height; ++y)
+				if (template[0][y] == transparent || template[width - 1][y] == transparent)
+					throw BadTransparentDistribution;
+		}
+
+		private static Exception BadTransparentDistribution
+		{
+			get
+			{
+				return new ArgumentException("Threshold row or column couldn't be fully transparent");
+			}
 		}
 
 		/// <summary>
@@ -62,16 +94,29 @@ namespace SearchingTools
 		/// </summary>
 		private void InitializeSmallPictureTemplate()
 		{
-			int left = (template.GetLength(0) - smallTemplateWidth) / 2;
-			int top = (template[0].GetLength(0) - smallTemplateHeight) / 2;
-			smallPictureRegion = new Rectangle(left, top, smallTemplateWidth, smallTemplateHeight);
-			
-			smallPictureTemplate = ImageConverter.CreateMatrix<SimpleColor>(smallPictureRegion.Width, 
-				smallPictureRegion.Height);
-				
-			for (int x = 0; x < smallPictureRegion.Width; ++x)
-				for (int y = 0; y < smallPictureRegion.Height; ++y)
-					smallPictureTemplate[x][y] = template[smallPictureRegion.Left + x][smallPictureRegion.Top + y];
+			int maxNonTransparentPoints = 0;
+			int width = ImageComparer.Width(template);
+			int height = ImageComparer.Height(template);
+			int maxX = width - smallTemplateWidth + 1;
+			int maxY = height - smallTemplateHeight + 1;
+			for (int x = 0; x < maxX; ++x)
+				for (int y = 0; y < maxY; ++y)
+				{
+					int nonTransparent = 0;
+					for (int dx = 0; dx < smallTemplateWidth; ++dx)
+						for (int dy = 0; dy < smallTemplateHeight; ++dy)
+							if (template[x + dx][y + dy] != reservedColor)
+								++nonTransparent;
+					if (nonTransparent > maxNonTransparentPoints)
+					{
+						maxNonTransparentPoints = nonTransparent;
+						smallPictureRegion = new Rectangle(x, y, smallTemplateWidth, smallTemplateHeight);
+					}
+				}
+			smallPictureTemplate = ImageConverter.CreateMatrix<SimpleColor>(smallTemplateWidth, smallTemplateHeight);
+			for (int dx = 0; dx < smallTemplateWidth; ++dx)
+				for (int dy = 0; dy < smallTemplateHeight; ++dy)
+					smallPictureTemplate[dx][dy] = template[smallPictureRegion.Left + dx][smallPictureRegion.Top + dy];
 		}
 
 		/// <summary>
@@ -136,29 +181,101 @@ namespace SearchingTools
 		/// <param name="elements">Count of elements on the image that should match template</param>
 		public void Learn(SimpleColor[][] image, int elements)
 		{
-			SimpleColor[] minDifferences = Enumerable
-				.Repeat(SimpleColor.FromRgb(byte.MaxValue, byte.MaxValue, byte.MaxValue), elements)
-				.ToArray();
-				
-			Point[] positions = new Point[elements];
-			
-			int maxX = image.GetLength(0) - template.GetLength(0) + 1;
-			int maxY = image[0].GetLength(0) - template[0].GetLength(0) + 1;
-			
-			for (int x = 0; x < maxX; ++x)
-				for (int y = 0; y < maxY; ++y)
-				{
-					SimpleColor diff = ImageComparer.CalculateDifference(
-						image,
-						new Point(x, y),
-						template,
-						reservedColor);
+			//SimpleColor[] minDifferences = Enumerable
+			//	.Repeat(SimpleColor.FromRgb(byte.MaxValue, byte.MaxValue, byte.MaxValue), elements)
+			//	.ToArray();
 
-					SmartInsert(minDifferences, positions, diff, new Point(x, y));
-				}
-				
-			UpdateAdmissibleDifference(minDifferences);
-			UpdateAdmissibleDifferenceForSmallTemplate(image, positions);
+			//Point[] positions = new Point[elements];
+
+			//int maxX = image.GetLength(0) - template.GetLength(0) + 1;
+			//int maxY = image[0].GetLength(0) - template[0].GetLength(0) + 1;
+
+			//for (int x = 0; x < maxX; ++x)
+			//	for (int y = 0; y < maxY; ++y)
+			//	{
+			//		SimpleColor diff = ImageComparer.CalculateDifference(
+			//			image,
+			//			new Point(x, y),
+			//			template,
+			//			reservedColor);
+
+			//		SmartInsert(minDifferences, positions, diff, new Point(x, y));
+			//	}
+
+			//UpdateAdmissibleDifference(minDifferences);
+			//UpdateAdmissibleDifferenceForSmallTemplate(image, positions);
+			Learn(image, elements, new List<Rectangle>());
+		}
+
+		private void Learn(SimpleColor[][] image, int elementsLeft, List<Rectangle> invalidRegions)
+		{
+			int width = ImageComparer.Width(image);
+			int height = ImageComparer.Height(image);
+
+			int maxX = width - this.Width + 1;
+			int maxY = height - this.Height + 1;
+
+			var differences = ImageConverter.CreateMatrix<SimpleColor>(maxX, maxY);
+			Parallel.For(0, maxX, x =>
+				{
+					for (int y = 0; y < maxY; ++y)
+						differences[x][y] = ImageComparer.CalculateDifference(
+							image,
+							new Point(x, y),
+							this.template,
+							this.reservedColor);
+				});
+
+			var bestPositions = new Point[elementsLeft];
+			
+			while (elementsLeft > 0)
+			{
+				var position = FindMin(differences, invalidRegions);
+				if (differences[position.X][position.Y] == (SimpleColor)Color.White)
+					throw new InvalidOperationException("Cant find all subpictures. State may be corrupted now.");
+				bestPositions[elementsLeft - 1] = position;
+				--elementsLeft;
+				invalidRegions.Add(new Rectangle(position, this.Size));
+			}
+
+			var minDiffs = bestPositions.Select(pos => differences[pos.X][pos.Y]).ToArray();
+			UpdateAdmissibleDifference(minDiffs);
+			UpdateAdmissibleDifferenceForSmallTemplate(image, bestPositions);
+		}
+
+		private Point FindMin(SimpleColor[][] differences, List<Rectangle> invalidRegions)
+		{
+			int width = ImageComparer.Width(differences);
+			int height = ImageComparer.Height(differences);
+
+			SimpleColor min = (SimpleColor)Color.White;
+			Point pos = new Point();
+			object locker = new object();
+
+			Parallel.For(0, width, x =>
+				{
+					Point localPos = new Point();
+					SimpleColor localMin;
+					localPos.X = x;
+					lock (locker)
+						localMin = min;
+
+					for (int y = 0; y < height; ++y)
+						if (Compare(differences[x][y], localMin) < 0)
+						{
+							localMin = differences[x][y];
+							localPos.Y = y;
+						}
+
+					lock (locker)
+						if (Compare(localMin, min) < 0)
+						{
+							min = localMin;
+							pos = localPos;
+						}
+				});
+
+			return pos;
 		}
 
 		private void UpdateAdmissibleDifference(SimpleColor[] differences)

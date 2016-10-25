@@ -20,9 +20,14 @@ namespace SearchingTools
 			};
 		}
 
-		public static explicit operator System.Drawing.Color(SimpleColor color)
+		public static implicit operator System.Drawing.Color(SimpleColor color)
 		{
 			return System.Drawing.Color.FromArgb(color.R, color.G, color.B);
+		}
+
+		public static explicit operator SimpleColor(System.Drawing.Color color)
+		{
+			return SimpleColor.FromRgb(color.R, color.B, color.G);
 		}
 
 		#region Equality and equivalence
