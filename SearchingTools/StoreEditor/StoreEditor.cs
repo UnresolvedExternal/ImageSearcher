@@ -55,8 +55,8 @@ namespace StoreEditor
 
 		private static void InitializeSelectedIndex(ListBox list, object previousSelected)
 		{
-			int index = list.Items.IndexOf(previousSelected);
-			if (previousSelected == null || index == -1)
+			int index = previousSelected == null ? -1 : list.Items.IndexOf(previousSelected);
+			if (index == -1)
 				list.SelectedIndex = list.Items.Count == 0 ? -1 : 0;
 			else
 				list.SelectedIndex = index;
