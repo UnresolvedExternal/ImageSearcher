@@ -47,8 +47,8 @@ namespace SearchingTools
 			return template;
 		}
 
-		/// <param name="template"></param>
 		/// <param name="reservedColor">Points in template which match reservedColor are considered transparent</param>
+		/// <exception cref="System.ArgumentException"></exception>
 		public ImageSearcher(SimpleColor[][] template, SimpleColor reservedColor)
 		{
 			CheckSize(template);
@@ -167,8 +167,6 @@ namespace SearchingTools
 		/// <summary>
 		/// Searches for subpictures that match template
 		/// </summary>
-		/// <param name="source"></param>
-		/// <returns></returns>
 		public IEnumerable<Point> GetPositions(SimpleColor[][] source)
 		{
 			var smallPicturePositions = GetSmallPicturePositions(source);
@@ -191,7 +189,6 @@ namespace SearchingTools
 		/// <summary>
 		/// Updates maximal admissible differences
 		/// </summary>
-		/// <param name="image"></param>
 		/// <param name="elements">Count of elements on the image that should match template</param>
 		public void Learn(SimpleColor[][] image, int elements)
 		{
@@ -346,7 +343,6 @@ namespace SearchingTools
 		/// Unite .Learn() results for this and another searchers which represent
 		/// same templates
 		/// </summary>
-		/// <param name="other"></param>
 		public void UniteWith(ImageSearcher other)
 		{
 			if (!TemplatesEqual(other))

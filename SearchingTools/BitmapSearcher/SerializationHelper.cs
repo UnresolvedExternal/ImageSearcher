@@ -13,20 +13,27 @@ namespace SearchingTools
 		private static DataContractJsonSerializer formatter =
 			new DataContractJsonSerializer(typeof(BitmapSearcher));
 
+		/// <exception cref="System.Runtime.SerializationException"></exception>
 		public static void Serialize(BitmapSearcher obj, Stream output)
 		{
-			using (var memory = new MemoryStream())
+			try
 			{
-				formatter.WriteObject(memory, obj);
-				memory.WriteTo(output);
+				using (var memory = new MemoryStream())
+				{
+					formatter.WriteObject(memory, obj);
+					memory.WriteTo(output);
+				}
+			}
+			catch (System.Exception e)
+			{
+				throw new System.Runtime.Serialization.SerializationException("Unknown", e);
 			}
 		}
 
 		/// <summary>
 		/// Десериализует объект. Восстанавливает поток в случае ошибки.
 		/// </summary>
-		/// <param name="input"></param>
-		/// <returns></returns>
+		/// <exception cref="System.Runtime.SerializationException"></exception>
 		public static BitmapSearcher Deserialize(Stream input)
 		{
 			var oldPosition = input.Position;

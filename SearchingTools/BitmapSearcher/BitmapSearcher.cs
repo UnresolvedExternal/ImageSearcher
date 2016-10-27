@@ -20,6 +20,7 @@ namespace SearchingTools
 		[DataMember]
 		private ImageSearcher searcher;
 
+		/// <exception cref="System.ArgumentException">Invalid template</exception>
 		public BitmapSearcher(Bitmap template, SimpleColor transparentColor)
 		{
 			searcher = new ImageSearcher(Converter.ToMatrix(template), transparentColor);
@@ -45,10 +46,14 @@ namespace SearchingTools
 		/// </summary>
 		/// <param name="image">Некоторое изображение</param>
 		/// <param name="templateCount">Количество ожидаемых совпадений с шаблоном в image</param>
+		/// <exception cref="System.ArgumentOutOfRangeException"></exception>
+		/// <exception cref="System.ArgumentNullException"></exception>
 		public void Learn(Bitmap image, int templateCount)
 		{
-			if (templateCount <= 0 || object.ReferenceEquals(image, null))
-				throw new ArgumentException("image was null or templateCount <= 0");
+			if (templateCount <= 0)
+				throw new ArgumentOutOfRangeException("templateCount");
+			if (object.ReferenceEquals(image, null))
+				throw new ArgumentNullException("image");
 			searcher.Learn(Converter.ToMatrix(image), templateCount);
 		}
 
@@ -65,11 +70,13 @@ namespace SearchingTools
 		/// <summary>
 		/// Загружает из потока объект BitmapSearcher, сохранённый при помощи метода Save.
 		/// </summary>
+		/// <exception cref="System.Runtime.SerializationException"></exception>
 		public static BitmapSearcher Load(Stream input)
 		{
 			return SerializationHelper.Deserialize(input);
 		}
 
+		/// <exception cref="System.Runtime.SerializationException"></exception>
 		public void Save(Stream output)
 		{
 			SerializationHelper.Serialize(this, output);
