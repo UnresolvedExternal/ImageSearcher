@@ -240,22 +240,21 @@ namespace SearchingTools
 							this.reservedColor);
 				});
 
-			var bestPositions = new Point[elementsLeft];
+			var bestPositions = new List<Point>();
 			
 			while (elementsLeft > 0)
 			{
-				var position = FindMin(differences, invalidRegions);
-				bestPositions[elementsLeft - 1] = position;
+				var position = FindMin(differences, bestPositions);
+				bestPositions.Add(position);
 				--elementsLeft;
-				invalidRegions.Add(new Rectangle(position, this.Size));
 			}
 
 			var minDiffs = bestPositions.Select(pos => differences[pos.X][pos.Y]).ToArray();
 			UpdateAdmissibleDifference(minDiffs);
-			UpdateAdmissibleDifferenceForSmallTemplate(image, bestPositions);
+			UpdateAdmissibleDifferenceForSmallTemplate(image, bestPositions.ToArray());
 		}
 
-		private Point FindMin(SimpleColor[][] differences, List<Rectangle> invalidRegions)
+		private Point FindMin(SimpleColor[][] differences, List<Point> taken)
 		{
 			int width = ImageComparer.Width(differences);
 			int height = ImageComparer.Height(differences);
@@ -275,8 +274,8 @@ namespace SearchingTools
 					for (int y = 0; y < height; ++y)
 					{
 						bool valid = true;
-						foreach (var r in invalidRegions)
-							if (Contains(r, x, y))
+						foreach (var p in taken)
+							if (IsConflicted(p, x, y))
 							{
 								valid = false;
 								break;
@@ -302,12 +301,14 @@ namespace SearchingTools
 			return pos;
 		}
 
-		private bool Contains(Rectangle r, int x, int y)
+		private bool IsConflicted(Point p, int x, int y)
 		{
-			return x >= r.Left &&
-				x < r.Right &&
-				y >= r.Top &&
-				y < r.Bottom;
+			int dx = Math.Abs(p.X - x);
+			int dy = Math.Abs(p.Y - y);
+			if (dx < Width && dy < Height)
+				return true;
+			else
+				return false;
 		}
 
 		private void UpdateAdmissibleDifference(SimpleColor[] differences)

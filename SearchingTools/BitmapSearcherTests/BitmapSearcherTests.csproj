@@ -44,6 +44,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ComplexTests.cs" />
+    <Compile Include="Helper.cs" />
+    <Compile Include="StrictedTests.cs" />
     <Compile Include="ThresholdTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
