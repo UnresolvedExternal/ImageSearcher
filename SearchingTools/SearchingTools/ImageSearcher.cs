@@ -61,7 +61,7 @@ namespace SearchingTools
 
 		private static void CheckSize(SimpleColor[][] template)
 		{
-			if (template.GetLength(0) <= smallTemplateWidth || template[0].GetLength(0) <= smallTemplateHeight)
+			if (template.GetLength(0) < smallTemplateWidth || template[0].GetLength(0) < smallTemplateHeight)
 				throw new ArgumentException(
 					string.Format("To small size of template. Required at least: width = {0}, height = {1}",
 						smallTemplateWidth, smallTemplateHeight));
