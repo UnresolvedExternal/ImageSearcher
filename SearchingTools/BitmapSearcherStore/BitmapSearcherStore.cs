@@ -114,8 +114,18 @@ namespace SearchingTools
 		/// <summary>
 		/// Адаптирует настройки поисковика при помощи изображения, содержащего count элементов
 		/// </summary>
+		/// <exception cref="System.ArgumentNullException"></exception>
+		/// <exception cref="System.ArgumentOutOfRangeException"></exception>
+		/// <exception cref="System.Collections.Generic.KeyNotFoundException"></exception>"
 		public async Task UpgradeAsync(string id, Bitmap image, int count)
 		{
+			if (id == null)
+				throw new ArgumentNullException("id");
+			if (image == null)
+				throw new ArgumentNullException("image");
+			if (count <= 0)
+				throw new ArgumentOutOfRangeException("count");
+
 			ConcurrentSearcher cs;
 			lock (locker)
 			{

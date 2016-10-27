@@ -88,6 +88,13 @@ namespace StoreEditor
 				return SaveResult.Cancelled;
 		}
 
+		private void ShowUnknownErrorExhortation(Exception e)
+		{
+			MessageBox.Show(e.Message, "Unknown error");
+			MessageBox.Show("Unknown error was occured. It is better to reopen " +
+				"the application without saving. Otherwise you riscs to corrupt the data.", "Error");
+		}
+
 		private SaveResult ProcessSave(SaveFileDialog dialog)
 		{
 			try
@@ -101,9 +108,14 @@ namespace StoreEditor
 				_changed = false;
 				return SaveResult.Succeeded;
 			}
+			catch (IOException e)
+			{
+				MessageBox.Show("Input/output error: " + e.Message, "Error");
+				return SaveResult.Cancelled;
+			}
 			catch (Exception e)
 			{
-				MessageBox.Show(e.Message, "Unknown error");
+				ShowUnknownErrorExhortation(e);
 				return SaveResult.Cancelled;
 			}
 		}
@@ -118,22 +130,35 @@ namespace StoreEditor
 
 		private void ProcessLoad(string filename)
 		{
+			bool isLoaded = false;
 			try
 			{
 				_store = BitmapSearcherStore.Load(filename);
+				isLoaded = true;
 				_changed = false;
 				UpdateTemplateNamesListBox();
 			}
+			catch (IOException e)
+			{
+				MessageBox.Show("Input/output error: " + e.Message, "Error");
+			}
 			catch (Exception e)
 			{
-				MessageBox.Show(e.Message, "Unknown error");
+				ShowUnknownErrorExhortation(e);
+			}
+			finally
+			{
+				if (!isLoaded)
+				{
+					_store = new BitmapSearcherStore();
+					_changed = false;
+				}
 			}
 		}
 
 		/// <summary>
 		/// Сохраняет хранилище при необходимости.
 		/// </summary>
-		/// <returns></returns>
 		private SaveResult AskAndSave()
 		{
 			if (_changed)
@@ -189,9 +214,10 @@ namespace StoreEditor
 
 		private void ProcessAddTemplate(string filename)
 		{
+			Bitmap image = LoadBitmap(filename);
+
 			try
 			{
-				var image = (Bitmap)Image.FromFile(filename);
 				var data = GetTemplateNameRequestData(filename);
 				new TextRequestForm(data).ShowDialog();
 				data.ResultText = data.ResultText.Trim();
@@ -199,10 +225,32 @@ namespace StoreEditor
 				_store.Add(data.ResultText, image);
 				UpdateTemplateNamesListBox();
 			}
-			catch (Exception ex)
+			catch (ArgumentException)
 			{
-				MessageBox.Show(ex.Message, "Unknown error");
+				MessageBox.Show("Store already contains an alement with same id", "Error");
 			}
+			catch (Exception e)
+			{
+				ShowUnknownErrorExhortation(e);
+			}
+		}
+
+		private Bitmap LoadBitmap(string filename)
+		{
+			Bitmap image = null;
+			try
+			{
+				image = (Bitmap)Image.FromFile(filename);
+			}
+			catch (IOException e)
+			{
+				MessageBox.Show("Input/output error: " + e.Message, "Error");
+			}
+			catch (Exception e)
+			{
+				ShowUnknownErrorExhortation(e);
+			}
+			return image;
 		}
 
 		private TextRequestData GetTemplateNameRequestData(string filename)
@@ -230,16 +278,20 @@ namespace StoreEditor
 					{
 						await ProcessUpgrade(dialog.FileName);
 					}
+					catch (ArgumentNullException)
+					{
+						MessageBox.Show("Wrong file name", "Error");
+					}
 					catch (Exception ex)
 					{
-						MessageBox.Show(ex.Message, "Unknown error");
+						ShowUnknownErrorExhortation(ex);
 					}
 			}
 		}
 
 		private async Task ProcessUpgrade(string filename)
 		{
-			var image = (Bitmap)Image.FromFile(filename);
+			var image = LoadBitmap(filename);
 			var data = GetNumberRequestData();
 			new TextRequestForm(data).ShowDialog();
 			_changed = true;
@@ -288,7 +340,15 @@ namespace StoreEditor
 			else
 			{
 				_changed = true;
-				_store.Remove((string)id);
+				try
+				{
+					_store.Remove((string)id);
+				}
+				catch (ArgumentException exc)
+				{
+					ShowUnknownErrorExhortation(exc);
+					return;
+				}
 				UpdateTemplateNamesListBox();
 			}
 		}

@@ -44,6 +44,7 @@ namespace SearchingTools
 			return new System.IO.FileLoadException("The file is corrupted", inner);
 		}
 
+		/// <exception cref="System.IO.IOException"></exception>
 		public void Save(string filename)
 		{
 			try
