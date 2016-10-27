@@ -18,11 +18,11 @@ namespace BitmapSearcherTests
 		{
 			get
 			{
-				yield return new Bitmap(1, 1);
-				yield return new Bitmap(1, 2);
-				yield return new Bitmap(2, 1);
-				yield return new Bitmap(1, 4);
-				yield return new Bitmap(4, 1);
+				yield return Create(1, 1, Color.Red);
+				yield return Create(1, 2, Color.Red);
+				yield return Create(2, 1, Color.Red);
+				yield return Create(1, 4, Color.Red);
+				yield return Create(4, 1, Color.Red);
 			}
 		}
 
@@ -30,10 +30,10 @@ namespace BitmapSearcherTests
 		{
 			get
 			{
-				yield return new Bitmap(2, 2);
-				yield return new Bitmap(2, 3);
-				yield return new Bitmap(3, 2);
-				yield return new Bitmap(3, 3);
+				yield return Create(2, 2, Color.Red);
+				yield return Create(2, 3, Color.Red);
+				yield return Create(3, 2, Color.Red);
+				yield return Create(3, 3, Color.Red);
 			}
 		}
 
