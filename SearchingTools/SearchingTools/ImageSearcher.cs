@@ -195,29 +195,6 @@ namespace SearchingTools
 		/// <param name="elements">Count of elements on the image that should match template</param>
 		public void Learn(SimpleColor[][] image, int elements)
 		{
-			//SimpleColor[] minDifferences = Enumerable
-			//	.Repeat(SimpleColor.FromRgb(byte.MaxValue, byte.MaxValue, byte.MaxValue), elements)
-			//	.ToArray();
-
-			//Point[] positions = new Point[elements];
-
-			//int maxX = image.GetLength(0) - template.GetLength(0) + 1;
-			//int maxY = image[0].GetLength(0) - template[0].GetLength(0) + 1;
-
-			//for (int x = 0; x < maxX; ++x)
-			//	for (int y = 0; y < maxY; ++y)
-			//	{
-			//		SimpleColor diff = ImageComparer.CalculateDifference(
-			//			image,
-			//			new Point(x, y),
-			//			template,
-			//			reservedColor);
-
-			//		SmartInsert(minDifferences, positions, diff, new Point(x, y));
-			//	}
-
-			//UpdateAdmissibleDifference(minDifferences);
-			//UpdateAdmissibleDifferenceForSmallTemplate(image, positions);
 			Learn(image, elements, new List<Rectangle>());
 		}
 
@@ -301,6 +278,9 @@ namespace SearchingTools
 			return pos;
 		}
 
+		/// <summary>
+		/// Templates regions are intersected
+		/// </summary>
 		private bool IsConflicted(Point p, int x, int y)
 		{
 			int dx = Math.Abs(p.X - x);
