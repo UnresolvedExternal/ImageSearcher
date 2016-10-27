@@ -8,7 +8,6 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using System.Drawing;
 
 namespace BitmapSearcherTests
 {

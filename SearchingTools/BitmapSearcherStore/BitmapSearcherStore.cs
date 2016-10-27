@@ -52,14 +52,19 @@ namespace SearchingTools
 			}
 		}
 
+		/// <exception cref="System.Collections.Generic.KeyNotFoundException"></exception>
+		/// <exception cref="System.ArgumentNullException"></exception>
 		public void Remove(string id)
 		{
 			lock (locker)
 			{
-				simpleStore.Remove(id);
+				if (!simpleStore.Remove(id))
+					throw new KeyNotFoundException("id");
 			}
 		}
 
+		/// <exception cref="System.Collections.Generic.KeyNotFoundException"></exception>
+		/// <exception cref="System.ArgumentNullException"></exception>
 		public Bitmap GetTemplate(string id)
 		{
 			lock (locker)
@@ -68,21 +73,30 @@ namespace SearchingTools
 			}
 		}
 
+		/// <exception cref="System.Collections.Generic.KeyNotFoundException"></exception>
+		/// <exception cref="System.ArgumentNullException"></exception>
 		public SimpleColor GetTemplateSettings(string id)
 		{
+			if (id == null)
+				throw new ArgumentNullException("id");
 			lock (locker)
 			{
 				return simpleStore[id].GetLastVersion().GetAdmissibleDifference();
 			}
 		}
 
-		/// <exception cref="System.InvalidOperationException"></exception>
+		/// <exception cref="System.ArgumentException"></exception>
+		/// <exception cref="System.ArgumentNullException"></exception>
 		public void Add(string id, Bitmap template)
 		{
+			if (id == null)
+				throw new ArgumentNullException("id");
+			if (template == null)
+				throw new ArgumentNullException("template");
 			lock (locker)
 			{
 				if (simpleStore.ContainsKey(id))
-					throw new InvalidOperationException("Object with the same id alredy exists");
+					throw new ArgumentException("id");
 				var searcher = new BitmapSearcher(template, SimpleColor.FromRgb(0, 0, 0));
 				simpleStore[id] = new ConcurrentSearcher(searcher);
 			}

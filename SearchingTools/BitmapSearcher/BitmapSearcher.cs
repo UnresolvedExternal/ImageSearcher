@@ -21,8 +21,11 @@ namespace SearchingTools
 		private ImageSearcher searcher;
 
 		/// <exception cref="System.ArgumentException">Invalid template</exception>
+		/// <exception cref="System.ArgumentNullException"></exception>
 		public BitmapSearcher(Bitmap template, SimpleColor transparentColor)
 		{
+			if (object.ReferenceEquals(template, null))
+				throw new ArgumentNullException("template");
 			searcher = new ImageSearcher(Converter.ToMatrix(template), transparentColor);
 		}
 
