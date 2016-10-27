@@ -72,16 +72,30 @@ namespace SearchingTools
 			int width = ImageComparer.Width(template);
 			int height = ImageComparer.Height(template);
 
-			for (int x = 0; x < width; ++x)
-				if (template[x][0] == transparent || template[x][height - 1] == transparent)
-					throw BadTransparentDistribution;
+			bool badTransparentDistribution =
+				IsAllPointsHasOneColor(template, new Point(0, 0), new Point(1, 0), transparent) ||
+				IsAllPointsHasOneColor(template, new Point(0, 0), new Point(0, 1), transparent) ||
+				IsAllPointsHasOneColor(template, new Point(width - 1, height - 1), new Point(-1, 0), transparent) ||
+				IsAllPointsHasOneColor(template, new Point(width - 1, height - 1), new Point(0, -1), transparent);
 
-			for (int y = 0; y < height; ++y)
-				if (template[0][y] == transparent || template[width - 1][y] == transparent)
-					throw BadTransparentDistribution;
+			if (badTransparentDistribution)
+				throw BadTransparentDistributionException;
 		}
 
-		private static Exception BadTransparentDistribution
+		private static bool IsAllPointsHasOneColor(SimpleColor[][] image, Point start, Point delta, SimpleColor color)
+		{
+			while (start.X >= 0 && start.X < ImageComparer.Width(image) &&
+				start.Y >= 0 && start.Y < ImageComparer.Height(image))
+			{
+				if (image[start.X][start.Y] != color)
+					return false;
+				start.X += delta.X;
+				start.Y += delta.Y;
+			}
+			return true;
+		}
+
+		private static Exception BadTransparentDistributionException
 		{
 			get
 			{
