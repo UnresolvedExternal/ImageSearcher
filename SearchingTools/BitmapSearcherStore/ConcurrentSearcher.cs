@@ -38,7 +38,6 @@ namespace SearchingTools
 		/// <summary>
 		/// Возращает копию последнего зафиксированного состояния экземпляра BitmapSearcher
 		/// </summary>
-		/// <returns></returns>
 		public BitmapSearcher GetLastVersion()
 		{
 			lock (_locker)
@@ -48,14 +47,11 @@ namespace SearchingTools
 		/// <summary>
 		/// Вызывает асинхронно метод Learn подконтрольного объекта
 		/// </summary>
-		/// <param name="image"></param>
-		/// <param name="count"></param>
-		/// <returns></returns>
 		public async Task LearnAsync(Bitmap image, int count)
 		{
 			Task task;
 			lock (_locker)
-				task = _task.ContinueWith(t => Learn(image, count));
+				task = _task = _task.ContinueWith(t => Learn(image, count));
 			await task;
 		}
 
@@ -68,15 +64,19 @@ namespace SearchingTools
 		}
 
 		/// <summary>
-		/// Блокирует вызывающий поток до завершения всех операций (запланированных к моменту вызова) 
-		/// с подконтрольным объектом
+		/// Блокирует вызывающий поток до завершения всех операций
 		/// </summary>
 		public void Join()
 		{
-			Task task;
-			lock (_locker)
-				task = _task;
-			task.Wait();
+			bool isCompleted = false;
+			while (!isCompleted)
+			{
+				Task task;
+				lock (_locker)
+					task = _task;
+				task.Wait();
+				isCompleted = task.IsCompleted;
+			}
 		}
 	}
 }
