@@ -344,7 +344,7 @@ namespace StoreEditor
 				{
 					_store.Remove((string)id);
 				}
-				catch (ArgumentException exc)
+				catch (Exception exc)
 				{
 					ShowUnknownErrorExhortation(exc);
 					return;
