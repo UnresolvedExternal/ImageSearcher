@@ -16,18 +16,6 @@ namespace BitmapSearcherTests
 	{
 		static string _dir = "Stricted\\";
 
-		static IEnumerable<Point> ReadPoints(string filename)
-		{
-			string content = File.ReadAllText(filename);
-			foreach (Match match in Regex.Matches(content, @"\((?<X>\d+),\s*(?<Y>\d+)\)"))
-			{
-				Point next = new Point();
-				next.X = int.Parse(match.Groups["X"].Value);
-				next.Y = int.Parse(match.Groups["Y"].Value);
-				yield return next;
-			}
-		}
-
 		static IEnumerable<TestCaseData> TestCases
 		{
 			get
