@@ -14,7 +14,7 @@ namespace GodsGameApi
 		private IRules rules = new ClassicRules();
 
 		[Test]
-		public void SimpleTest1()
+		public void SingleSwapTest()
 		{
 			var before = @"
 RGB
@@ -48,7 +48,7 @@ RUR"
 
 
 		[Test]
-		public void SimpleTest2()
+		public void TripleSwapTest()
 		{
 			var before = @"
 RGB
@@ -96,7 +96,7 @@ GGR"
 
 
 		[Test]
-		public void SimpleTest3()
+		public void SingleSwapFullExplosiveTest()
 		{
 			var before = @"
 RGB
@@ -253,7 +253,7 @@ GGB"
 		}
 
 		[Test]
-		public void ComplexTest()
+		public void BigBoardCustomCheckingTest()
 		{
 			var before = @"
 YYBYHHPGY
