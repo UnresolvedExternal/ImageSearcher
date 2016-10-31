@@ -13,9 +13,7 @@ namespace GodsGameApi
 
 		ClassicGameState state;
 
-		ClassicRules rules = new ClassicRules();
-
-		internal ClassicAI(ClassicGameState state)
+		public ClassicAI(ClassicGameState state)
 		{
 			this.state = state;
 		}
@@ -41,8 +39,6 @@ namespace GodsGameApi
 		/// <summary>
 		/// Соотносит текущие жизни игроков в игре state
 		/// </summary>
-		/// <param name="state"></param>
-		/// <returns></returns>
 		double GetCurrentHpRatio(ClassicGameState state)
 		{
 			return GetHpRatio(state.CurrentPlayer, state.AnotherPlayer);
@@ -51,8 +47,6 @@ namespace GodsGameApi
 		/// <summary>
 		/// Получает один из лучших (возможно не самых) ходов для CurrentPlayer
 		/// </summary>
-		/// <param name="state"></param>
-		/// <returns></returns>
 		public Movement GetGoodMovement(int maxRecursionDepth, CancellationToken ct)
 		{
 			this.maxRecursionDepth = maxRecursionDepth;
@@ -76,7 +70,7 @@ namespace GodsGameApi
 			int depth, ref int switches, CancellationToken ct)
 		{
 			// Все ходы CurrentPlayer. В этих состояниях CurrentPlayer == Enemy
-			var map = rules.GetAllMovements(state);
+			var map = state.Rules.GetAllMovements(state);
 			
 			if (map.Count == 0)
 				return new KeyValuePair<Movement, ClassicGameState>(null, state);

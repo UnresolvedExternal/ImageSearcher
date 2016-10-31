@@ -16,8 +16,6 @@ namespace GodsGameApi
 		/// <summary>
 		/// Проверяет совпадение типов и совпадение сериализованных представлений объектов
 		/// </summary>
-		/// <param name="a"></param>
-		/// <param name="b"></param>
 		public static void AssertEqual(object a, object b)
 		{
 			Assert.That(a, Is.TypeOf(b.GetType()));
@@ -38,20 +36,14 @@ namespace GodsGameApi
 		/// <summary>
 		/// Создаёт игровое состояние в соответствии с параметрами
 		/// </summary>
-		/// <param name="cells"></param>
-		/// <param name="playerHp"></param>
-		/// <param name="enemyHp"></param>
-		/// <param name="playerBombs"></param>
-		/// <param name="enemyBombs"></param>
-		/// <param name="playerDynamits"></param>
-		/// <param name="enemyDynamits"></param>
-		/// <returns></returns>
 		public static ClassicGameState CreateState(string cells,
 			int playerHp, int enemyHp,
 			int playerBombs, int enemyBombs,
 			int playerDynamits, int enemyDynamits)
 		{
-			var dest = new ClassicGameState();
+			var board = TestHelper.CreateSimpleBoard(cells);
+			var dest = new ClassicGameState(board.Width, board.Height);
+			dest.Board = board;
 
 			dest.CurrentPlayer.Hp.Current = playerHp;
 			dest.CurrentPlayer.Bombs = playerBombs;
@@ -60,8 +52,6 @@ namespace GodsGameApi
 			dest.AnotherPlayer.Hp.Current = enemyHp;
 			dest.AnotherPlayer.Bombs = enemyBombs;
 			dest.AnotherPlayer.Dynamits = enemyDynamits;
-
-			dest.Board = TestHelper.CreateSimpleBoard(cells);
 
 			return dest;
 		}
@@ -117,8 +107,6 @@ namespace GodsGameApi
 		/// Создает доску из многострочного текста.
 		/// Строки должны содержать символы RGBYPHDEU в соответствии с перечисление ElementType
 		/// </summary>
-		/// <param name="cells"></param>
-		/// <returns></returns>
 		public static SimpleBoard CreateSimpleBoard(string cells)
 		{
 			cells = cells.Trim();

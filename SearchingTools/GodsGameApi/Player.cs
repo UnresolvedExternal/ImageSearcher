@@ -12,6 +12,7 @@ namespace GodsGameApi
 		public Hitpoints Hp { get; set; }
 		public int Bombs { get; set; }
 		public int Dynamits { get; set; }
+		public int Diamonds { get; set; }
 
 		public Player Clone()
 		{
@@ -19,7 +20,8 @@ namespace GodsGameApi
 				{
 					Hp = this.Hp.Clone(),
 					Bombs = this.Bombs,
-					Dynamits = this.Dynamits
+					Dynamits = this.Dynamits,
+					Diamonds = this.Diamonds
 				};
 		}
 
@@ -27,12 +29,13 @@ namespace GodsGameApi
 		{
 			return Hp.Equals(other.Hp) &&
 				Bombs == other.Bombs &&
-				Dynamits == other.Dynamits;
+				Dynamits == other.Dynamits &&
+				Diamonds == other.Diamonds;
 		}
 
 		public override string ToString()
 		{
-			return string.Format("Hp={0} Bombs={1} Dynamits={2}", Hp.ToString(), Bombs, Dynamits);
+			return string.Format("Hp={0} Bombs={1} Dynamits={2} Diamonds={3}", Hp.ToString(), Bombs, Dynamits, Diamonds);
 		}
 	}
 }

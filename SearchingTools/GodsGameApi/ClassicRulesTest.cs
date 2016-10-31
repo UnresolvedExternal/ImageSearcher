@@ -11,7 +11,6 @@ namespace GodsGameApi
 	[TestFixture]
 	class ClassicRulesTest
 	{
-		private IRules rules = new ClassicRules();
 
 		[Test]
 		public void SingleSwapTest()
@@ -40,7 +39,7 @@ RUR"
 			statesAfter.Add(TestHelper.CreateState(before, 90, 90 , 0, 0, 0, 0));
 			statesAfter.Add(TestHelper.CreateState(after[0], 81, 90, 0, 0, 0, 0));
 
-			var answer = rules.GetAllMovements(stateBefore);
+			var answer = stateBefore.Rules.GetAllMovements(stateBefore);
 			var rightAnswer = TestHelper.CreateDictionary(movements, statesAfter);
 
 			Assert.That(answer, Is.EqualTo(rightAnswer));
@@ -88,7 +87,7 @@ GGR"
 			statesAfter.Add(TestHelper.CreateState(after[1], 90 - 15, 90, 0, 0, 0, 0));
 			statesAfter.Add(TestHelper.CreateState(after[2], 90 - 15, 90, 0, 0, 0, 0));
 
-			var answer = rules.GetAllMovements(stateBefore);
+			var answer = stateBefore.Rules.GetAllMovements(stateBefore);
 			var rightAnswer = TestHelper.CreateDictionary(movements, statesAfter);
 			
 			Assert.That(answer, Is.EqualTo(rightAnswer));
@@ -242,7 +241,7 @@ GGB"
 			statesAfter.Add(TestHelper.CreateState(after[17], 25 - 25, 25, 8, 2, 3, 4));
 			statesAfter.Add(TestHelper.CreateState(after[18], 25 - 21, 25, 8, 2, 3, 4));
 
-			var answer = rules.GetAllMovements(stateBefore);
+			var answer = stateBefore.Rules.GetAllMovements(stateBefore);
 			var rightAnswer = TestHelper.CreateDictionary(movements, statesAfter);
 
 			var union = answer.Union(rightAnswer).ToList();
@@ -294,7 +293,7 @@ BHPHPPHYH"};
 			statesAfter.Add(TestHelper.CreateState(after[0], 25 - 10, 25, 2, 2, 2, 3));
 			statesAfter.Add(TestHelper.CreateState(after[1], 25 - 9, 25, 2, 2, 2, 2));
 
-			var answer = rules.GetAllMovements(stateBefore);
+			var answer = stateBefore.Rules.GetAllMovements(stateBefore);
 
 			for (int i = 0; i < movements.Length; ++i)
 				Assert.That(answer.Contains(new KeyValuePair<Movement, ClassicGameState>(movements[i], statesAfter[i])));

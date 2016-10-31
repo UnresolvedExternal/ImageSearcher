@@ -15,67 +15,13 @@ namespace GodsGameApi
 	/// </summary>
 	public class ClassicRules: IRules
 	{
-		const int arraySize = 256;
+		#region Damage and heal values accessors
 
-		double[] damage = new double[arraySize];
-		double[] heal = new double[arraySize];
+		static int _arraySize = typeof(ElementType).GetEnumValues().Length;
 
-		double secondaryBouncesMultiplier = 2 / 3.0;
+		double[] damage = new double[_arraySize];
+		double[] heal = new double[_arraySize];
 
-		// В целях оптимизации храним наборы точек каждого ряда
-		Point[][] rowsPoints;
-		Point[][] columnsPoints;
-		SpinLock locker = new SpinLock();
-
-		private bool NeedPointsInitialization(int newWidth, int newHeight)
-		{
-			if (!object.ReferenceEquals(rowsPoints, null) &&
-				!object.ReferenceEquals(columnsPoints, null) &&
-				rowsPoints.Length == newHeight + 1 &&
-				columnsPoints.Length == newWidth + 1)
-			{
-				return false;
-			}
-
-			return true;
-		}
-
-		private void InitializeRowsAndColumnsPoints(int width, int height)
-		{
-			rowsPoints = new Point[height + 1][];
-			for (int y = 1; y <= height; ++y)
-			{
-				rowsPoints[y] = new Point[width];
-				for (int x = 0; x < width; ++x)
-				{
-					rowsPoints[y][x] = new Point(x + 1, y);
-				}
-			}
-
-			columnsPoints = new Point[width + 1][];
-			for (int x = 1; x <= width; ++x)
-			{
-				columnsPoints[x] = new Point[height];
-				for (int y = 0; y < height; ++y)
-				{
-					columnsPoints[x][y] = new Point(x, y + 1);
-				}
-			}
-		}
-
-		public ClassicRules()
-		{
-			damage[GetIndex(ElementType.Red)] = 5;
-			damage[GetIndex(ElementType.Green)] = 3;
-			damage[GetIndex(ElementType.Blue)] = 4;
-			damage[GetIndex(ElementType.Purple)] = 1;
-			damage[GetIndex(ElementType.Yellow)] = 2;
-			heal[GetIndex(ElementType.Heart)] = 4;
-		}
-		
-		/// <summary>
-		/// </summary>
-		/// <param name="e"></param>
 		/// <returns>Индекс для массивов damage или heal</returns>
 		private int GetIndex(ElementType e)
 		{
@@ -90,6 +36,54 @@ namespace GodsGameApi
 		private double GetHeal(ElementType e)
 		{
 			return heal[GetIndex(e)];
+		}
+
+		#endregion
+
+		double _secondaryBouncesMultiplier = 2 / 3.0;
+
+		// В целях оптимизации храним наборы точек каждого ряда
+		Point[][] _rowsPoints;
+		Point[][] _columnsPoints;
+
+		int _width;
+		int _height;
+
+		public ClassicRules(int width, int height)
+		{
+			_width = width;
+			_height = height;
+			InitializeRowsAndColumnsPoints(width, height);
+
+			damage[GetIndex(ElementType.Red)] = 5;
+			damage[GetIndex(ElementType.Green)] = 3;
+			damage[GetIndex(ElementType.Blue)] = 4;
+			damage[GetIndex(ElementType.Purple)] = 1;
+			damage[GetIndex(ElementType.Yellow)] = 2;
+			heal[GetIndex(ElementType.Heart)] = 4;
+		}
+
+		private void InitializeRowsAndColumnsPoints(int width, int height)
+		{
+			_rowsPoints = new Point[height + 1][];
+			for (int y = 1; y <= height; ++y)
+			{
+				_rowsPoints[y] = new Point[width];
+				for (int x = 0; x < width; ++x)
+				{
+					_rowsPoints[y][x] = new Point(x + 1, y);
+				}
+			}
+
+			_columnsPoints = new Point[width + 1][];
+			for (int x = 1; x <= width; ++x)
+			{
+				_columnsPoints[x] = new Point[height];
+				for (int y = 0; y < height; ++y)
+				{
+					_columnsPoints[x][y] = new Point(x, y + 1);
+				}
+			}
 		}
 
 		private static bool IsOrdinary(ElementType e)
@@ -126,8 +120,6 @@ namespace GodsGameApi
 		/// <summary>
 		/// Определяет, будет ли элемент разрушен, если будет в линии с такими же элементами
 		/// </summary>
-		/// <param name="e"></param>
-		/// <returns></returns>
 		private static bool IsExplosiveInLine(ElementType e)
 		{
 			return IsOrdinary(e);
@@ -136,14 +128,8 @@ namespace GodsGameApi
 		/// <summary>
 		/// Проверяет корректен ли ход с обменом элементов
 		/// </summary>
-		/// <param name="first"></param>
-		/// <param name="second"></param>
-		/// <param name="board"></param>
-		/// <returns></returns>
-		private bool IsCorrectMovement(Point first, Point second, SimpleBoard board)
+		private bool IsSwapCorrect(Point first, Point second, SimpleBoard board)
 		{
-			Contract.Requires(AreNear(first, second));
-
 			if (!IsManuallyMovable(board.Cells[first.X, first.Y]) ||
 				!IsManuallyMovable(board.Cells[second.X, second.Y]))
 			{
@@ -151,38 +137,42 @@ namespace GodsGameApi
 			}
 
 			Swap(first, second, board);
-			bool result =
-				IsExplosiveRow(first.Y, board) ||
-				IsExplosiveRow(second.Y, board) ||
-				IsExplosiveColumn(first.X, board) ||
-				IsExplosiveColumn(second.X, board);
-			Swap(first, second, board);
 
+			bool result;
+			try
+			{
+				result =
+					IsExplosiveRow(first.Y, board) ||
+					(second.Y != first.Y) && IsExplosiveRow(second.Y, board) ||
+					IsExplosiveColumn(first.X, board) ||
+					(first.X != second.X) && IsExplosiveColumn(second.X, board);
+			}
+			finally
+			{
+				Swap(first, second, board);
+			}
 			return result;
 		}
-
-		[Pure]
-		private static bool InRange(int value, int a, int b)
-		{
-			return (value >= a && value <= b) || (value >= b && value <= a);
-		} 
 
 		/// <summary>
 		/// Проверяет, есть ли в строке ряд, который должен быть разрушен
 		/// </summary>
-		/// <param name="y"></param>
-		/// <param name="board"></param>
-		/// <returns></returns>
 		private bool IsExplosiveRow(int y, SimpleBoard board)
 		{
 			return IsExplosiveLine(new Point(1, y), new Point(1, 0), board);
 		}
 
 		/// <summary>
+		/// Проверяет, есть ли в столбце ряд, который должен быть разрушен
+		/// </summary>
+		private bool IsExplosiveColumn(int x, SimpleBoard board)
+		{
+			return IsExplosiveLine(new Point(x, 1), new Point(0, 1), board);
+		}
+
+		/// <summary>
 		/// Проверяет, нужно ли производить взрывы на доске в соответствии с правилами игры
 		/// </summary>
-		/// <param name="board"></param>
-		/// <returns></returns>
 		private bool IsDetonationRequired(SimpleBoard board)
 		{
 			for (int x = 1; x <= board.Width; ++x)
@@ -197,51 +187,26 @@ namespace GodsGameApi
 		}
 
 		/// <summary>
-		/// Проверяет, есть ли в столбце ряд, который должен быть разрушен
-		/// </summary>
-		/// <param name="x"></param>
-		/// <param name="board"></param>
-		/// <returns></returns>
-		private bool IsExplosiveColumn(int x, SimpleBoard board)
-		{
-			return IsExplosiveLine(new Point(x, 1), new Point(0, 1), board);
-		}
-
-		/// <summary>
 		/// Возвращает все точки строки
 		/// </summary>
-		/// <param name="start"></param>
-		/// <param name="shift"></param>
-		/// <param name="width"></param>
-		/// <param name="height"></param>
-		/// <returns></returns>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private Point[] GetRowPoints(int y)
 		{
-			return rowsPoints[y];
+			return _rowsPoints[y];
 		}
 
 		/// <summary>
 		/// Возвращает все точки столбца
 		/// </summary>
-		/// <param name="start"></param>
-		/// <param name="shift"></param>
-		/// <param name="width"></param>
-		/// <param name="height"></param>
-		/// <returns></returns>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private Point[] GetColumnPoints(int x)
 		{
-			return columnsPoints[x];
+			return _columnsPoints[x];
 		}
 
 		/// <summary>
 		/// Проверяет, есть ли в линии ряд, который должен быть разрушен
 		/// </summary>
 		/// <param name="start">Первая точка линни</param>
-		/// <param name="shift">Смещение, определяющее направление линии</param>
-		/// <param name="board"></param>
-		/// <returns></returns>
+		/// <param name="shift">Смещение, определяющее направление линии: (0, 1) или (1, 0)</param>
 		private bool IsExplosiveLine(Point start, Point shift, SimpleBoard board)
 		{
 			int sequence = 1;
@@ -251,10 +216,9 @@ namespace GodsGameApi
 			for (int i = 1; i < points.Length; ++i)
 			{
 				var currPoint = points[i];
-				var currCell = board.Cells[currPoint.X, currPoint.Y];
+				var currCell = board[currPoint];
 
-				if (currCell == board.Cells[prevPoint.X, prevPoint.Y] &&
-					IsExplosiveInLine(currCell))
+				if (currCell == board[prevPoint] && IsExplosiveInLine(currCell))
 				{
 					++sequence;
 					if (sequence >= 3)
@@ -272,28 +236,11 @@ namespace GodsGameApi
 		/// <summary>
 		/// Меняет элементы в соответствующих позициях местами
 		/// </summary>
-		/// <param name="first"></param>
-		/// <param name="second"></param>
-		/// <param name="board"></param>
 		private static void Swap(Point first, Point second, SimpleBoard board)
 		{
-			ElementType temp = board.Cells[first.X, first.Y];
-			board.Cells[first.X, first.Y] = board.Cells[second.X, second.Y];
-			board.Cells[second.X, second.Y] = temp;
-		}
-
-		/// <summary>
-		/// Определяет, смежны ли клетки по стороне
-		/// </summary>
-		/// <param name="first"></param>
-		/// <param name="second"></param>
-		/// <returns></returns>
-		[Pure]
-		private static bool AreNear(Point first, Point second)
-		{
-			int dx = second.X - first.X;
-			int dy = second.Y - first.Y;
-			return (Math.Abs(dx) == 1 && dy == 0) || (Math.Abs(dy) == 1 && dx == 0);
+			var temp = board[first];
+			board[first] = board[second];
+			board[second] = temp;
 		}
 
 		/// <summary>
@@ -301,52 +248,33 @@ namespace GodsGameApi
 		/// исходного состояния за один ход
 		/// </summary>
 		/// <param name="source">Исходное состояние</param>
-		/// <returns>Список возможных состояний</returns>
+		/// <returns>Словарь возможных состояний</returns>
 		public Dictionary<Movement, ClassicGameState> GetAllMovements(ClassicGameState source)
 		{
-			
-
-			bool lockTaken = false;
-			locker.Enter(ref lockTaken);
-			
-			if (lockTaken == false)
-				throw new SynchronizationLockException("");
-
-			if (NeedPointsInitialization(source.Board.Width, source.Board.Width))
-			{
-				if (rowsPoints == null)
-					InitializeRowsAndColumnsPoints(source.Board.Width, source.Board.Height);
-				else
-				{
-					// инициализированные значения могут быть нужны другим потокам
-					// поэтому мы не станем их менять
-					locker.Exit(true);
-					return new ClassicRules().GetAllMovements(source);
-				}
-			}
-
-			locker.Exit(true);
-
+			Validate(source);
 			var result = new Dictionary<Movement, ClassicGameState>();
-
 			if (source.GameOver())
-			{
 				return result;
-			}
 
 			AddSwaps(result, source);
 			if (result.Count == 0)
 				return result; // некорректное состояние игры
 
 			if (source.CurrentPlayer.Bombs > 0)
-				AddExplosiveItemUsages(result, source, GetBombShape);
+				AddExplosiveItemUsages(result, source, isBomb: true);
 
 			if (source.CurrentPlayer.Dynamits > 0)
-				AddExplosiveItemUsages(result, source, GetDynamitShape);
+				AddExplosiveItemUsages(result, source, isBomb: false);
 
 			AddEmptyMovement(result, source);
 
 			return result;
+		}
+
+		private void Validate(ClassicGameState source)
+		{
+			if (source.Board.Width != _width || source.Board.Height != _height)
+				throw new ArgumentException("Incorrect source size");
 		}
 
 		private void AddEmptyMovement(Dictionary<Movement, ClassicGameState> result, ClassicGameState source)
@@ -362,7 +290,6 @@ namespace GodsGameApi
 			result.Add(movement, state);
 		}
 
-
 		private static Point[] GetBombShape(Point center)
 		{
 			var shape = new Point[5];
@@ -374,23 +301,24 @@ namespace GodsGameApi
 			return shape;
 		}
 
-		private static IEnumerable<Point> GetDynamitShape(Point center)
+		private static Point[] GetDynamitShape(Point center)
 		{
+			var shape = new Point[9];
+			int count = 0;
 			for (int dx = -1; dx <= 1; ++dx)
 				for (int dy = -1; dy <= 1; ++dy)
-					yield return new Point(center.X + dx, center.Y + dy);
+					shape[count++] = new Point(center.X + dx, center.Y + dy);
+			return shape;
 		}
 
 		/// <summary>
 		/// Добавляет в словарь ходов, все возможные ходы с использованием взрывчатки
 		/// </summary>
-		/// <param name="dest"></param>
-		/// <param name="state"></param>
 		private void AddExplosiveItemUsages(Dictionary<Movement, ClassicGameState> dest, ClassicGameState state,
-			Func<Point, IEnumerable<Point>> explosiveItemGetShape)
+			bool isBomb)
 		{
-			ClassicMovementKind current = (explosiveItemGetShape == GetBombShape) ?
-				ClassicMovementKind.Bomb : ClassicMovementKind.Dynamit;
+			var current = isBomb ? ClassicMovementKind.Bomb : ClassicMovementKind.Dynamit;
+			var explosiveItemGetShape = isBomb ? (Func<Point, Point[]>)GetBombShape : GetDynamitShape;
 
 			for (int x = 1; x <= state.Board.Width; ++x)
 				for (int y = 1; y <= state.Board.Height; ++y)
@@ -406,16 +334,17 @@ namespace GodsGameApi
 				}
 		}
 
-		private ClassicGameState GetStateAfterExplosition(IEnumerable<Point> explositionShape, ClassicGameState state, bool isBomb)
+		private ClassicGameState GetStateAfterExplosition(Point[] explositionShape, ClassicGameState state, bool isBomb)
 		{
 			double heal;
 			double damage;
 			int addBombs = isBomb ? -1 : 0;
 			int addDynamits = isBomb ? 0 : -1;
+			int addDiamonds;
 			
 			var result = state.Clone();
 
-			ExplodeOnce(explositionShape, result.Board, out heal, out damage);
+			ExplodeOnce(explositionShape, result.Board, out heal, out damage, out addDiamonds);
 			
 			// TODO: вынести информацию о доп. уроне в класс Player
 			damage += isBomb ? +2 : +3;
@@ -423,7 +352,7 @@ namespace GodsGameApi
 			addBombs = Math.Min(addBombs, 1);
 			addDynamits = Math.Min(addDynamits, 1);
 
-			ChangeGameState(result, heal, damage, addBombs, addDynamits);
+			ChangeGameState(result, heal, damage, addBombs, addDynamits, addDiamonds);
 			ExplodeSecondariesOnly(result);
 			
 			return result;
@@ -436,13 +365,13 @@ namespace GodsGameApi
 		/// <param name="state"></param>
 		private void AddSwaps(Dictionary<Movement, ClassicGameState> dest, ClassicGameState state)
 		{
-			foreach (var movement in GetAllUncheckedSwaps(state.Board))
+			foreach (var movement in GetUncheckedSwaps(state.Board))
 			{
 				var classicMovement = (ClassicMovement)movement;
 				Point first = classicMovement.First;
 				Point second = classicMovement.Second;
 
-				if (IsCorrectMovement(first, second, state.Board))
+				if (IsSwapCorrect(first, second, state.Board))
 				{
 					var newMovement = new ClassicMovement { First = first, Second = second };
 					dest.Add(movement, GetStateAfterSwap(first, second, state));
@@ -454,10 +383,10 @@ namespace GodsGameApi
 		/// Возвращает все возможные обмены соседних по стороне элементов доски.
 		/// Правила игры не учитываются.
 		/// </summary>
-		/// <param name="board"></param>
-		/// <returns></returns>
-		private static IEnumerable<Movement> GetAllUncheckedSwaps(SimpleBoard board)
+		private static List<Movement> GetUncheckedSwaps(SimpleBoard board)
 		{
+			var result = new List<Movement>();
+
 			int width = board.Width;
 			int height = board.Height;
 
@@ -475,7 +404,7 @@ namespace GodsGameApi
 								First = first,
 								Second = second
 							};
-						yield return movement;
+						result.Add(movement);
 					}
 
 					first = new Point(x, y - 1);
@@ -488,9 +417,16 @@ namespace GodsGameApi
 							First = first,
 							Second = second
 						};
-						yield return movement;
+						result.Add(movement);
 					}
 				}
+
+			return result;
+		}
+
+		private static bool InRange(int value, int a, int b)
+		{
+			return (value >= a && value <= b) || (value >= b && value <= a);
 		}
 
 		/// <summary>
@@ -501,38 +437,39 @@ namespace GodsGameApi
 		/// <param name="rawHeal">Получаемый отхил</param>
 		/// <param name="rawDamage">Нанесённый урон</param>
 		/// <returns>Количество уничтоженных Diamond</returns>
-		private int ExplodeOnce(IEnumerable<Point> positions, SimpleBoard board, 
-			out double rawHeal, out double rawDamage)
+		private void ExplodeOnce(Point[] positions, SimpleBoard board,
+			out double rawHeal, out double rawDamage, out int diamondsDestroyed)
 		{
 			rawHeal = 0;
 			rawDamage = 0;
 
-			foreach (var pos in positions.OrderBy(p => p.Y).Where(p => InRange(p.X, 1, board.Width) && InRange(p.Y, 1, board.Height)))
-			{
-				var curr = board.Cells[pos.X, pos.Y];
-				if (curr != ElementType.Diamond)
+			Array.Sort(positions, (a, b) => a.Y.CompareTo(b.Y));
+			foreach (var pos in positions)
+				if (InRange(pos.X, 1, board.Width) && InRange(pos.Y, 1, board.Height))
 				{
-					rawHeal += GetHeal(curr);
-					rawDamage += GetDamage(curr);
+					var curr = board[pos];
+					if (curr != ElementType.Diamond)
+					{
+						rawHeal += GetHeal(curr);
+						rawDamage += GetDamage(curr);
 
-					for (int y = pos.Y; y >= 1; --y)
-						board.Cells[pos.X, y] = board.Cells[pos.X, y - 1];
+						for (int y = pos.Y; y >= 1; --y)
+							board[pos.X, y] = board[pos.X, y - 1];
+					}
 				}
-			}
 
-			return DestroyDiamondsAtBottom(board);
+			diamondsDestroyed = DestroyDiamondsAtBottom(board);
 		}
 
 		/// <summary>
 		/// Уничтожает Diamonds на нижнем уровне доски. Производит смещение элементов при уничтожении.
 		/// </summary>
-		/// <param name="board"></param>
 		/// <returns>Количество уничтоженных алмазов</returns>
 		private static int DestroyDiamondsAtBottom(SimpleBoard board)
 		{
 			int diamonds = 0;
 			for (int x = 1; x <= board.Width; ++x)
-				if (board.Cells[x, board.Height] == ElementType.Diamond)
+				if (board[x, board.Height] == ElementType.Diamond)
 				{
 					++diamonds;
 					DestroySinglePoint(new Point(x, board.Height), board);
@@ -543,21 +480,15 @@ namespace GodsGameApi
 		/// <summary>
 		/// Уничтожение элемента и смещение элементов над ним вниз.
 		/// </summary>
-		/// <param name="point"></param>
-		/// <param name="board"></param>
 		private static void DestroySinglePoint(Point point, SimpleBoard board)
 		{
 			for (int y = point.Y; y >= 1; --y)
-				board.Cells[point.X, y] = board.Cells[point.X, y - 1];
+				board[point.X, y] = board[point.X, y - 1];
 		}
 
 		/// <summary>
 		/// Получает новое состояние игры при помощи обмена элементов и последующими взрывами
 		/// </summary>
-		/// <param name="first"></param>
-		/// <param name="second"></param>
-		/// <param name="source"></param>
-		/// <returns></returns>
 		private ClassicGameState GetStateAfterSwap(Point first, Point second, ClassicGameState source)
 		{
 			Swap(first, second, source.Board);
@@ -579,12 +510,13 @@ namespace GodsGameApi
 			double damage;
 			int bombs;
 			int dynamits;
+			int diamonds;
 
 			var result = source.Clone();
 
 			// Первая серия взрывов
-			ExplodeOnce(result.Board, out heal, out damage, out bombs, out dynamits);
-			ChangeGameState(result, heal, damage, bombs, dynamits);
+			ExplodeOnce(result.Board, out heal, out damage, out bombs, out dynamits, out diamonds);
+			ChangeGameState(result, heal, damage, bombs, dynamits, diamonds);
 
 			ExplodeSecondariesOnly(result);
 
@@ -601,6 +533,7 @@ namespace GodsGameApi
 			double damage = 0;
 			int bombs = 0;
 			int dynamits = 0;
+			int diamonds = 0;
 
 			while (IsDetonationRequired(result.Board))
 			{
@@ -609,19 +542,19 @@ namespace GodsGameApi
 				int newBombs;
 				int newDynamits;
 
-				ExplodeOnce(result.Board, out newHeal, out newDamage, out newBombs, out newDynamits);
+				ExplodeOnce(result.Board, out newHeal, out newDamage, out newBombs, out newDynamits, out diamonds);
 
-				heal += newHeal * secondaryBouncesMultiplier;
-				damage += newDamage * secondaryBouncesMultiplier;
+				heal += newHeal * _secondaryBouncesMultiplier;
+				damage += newDamage * _secondaryBouncesMultiplier;
 				bombs += newBombs;
 				dynamits += newDynamits;
 			}
 
-			ChangeGameState(result, heal, damage, bombs, dynamits);
+			ChangeGameState(result, heal, damage, bombs, dynamits, diamonds);
 			result.SwapPlayers();
 		}
 
-		private static void ChangeGameState(ClassicGameState state, double heal, double damage, int bombs, int dynamits)
+		private static void ChangeGameState(ClassicGameState state, double heal, double damage, int bombs, int dynamits, int diamonds)
 		{
 			state.CurrentPlayer.Hp.AddHealth((int)Math.Round(heal));
 			state.AnotherPlayer.Hp.AddHealth(-(int)Math.Round(damage));
@@ -638,24 +571,19 @@ namespace GodsGameApi
 		/// <param name="bombsAcquired">Приобретено бомб</param>
 		/// <param name="dynamitsAcquired">Приобретено динамитов</param>
 		private void ExplodeOnce(SimpleBoard board, out double rawHeal, out double rawDamage, 
-			out int bombsAcquired, out int dynamitsAcquired)
+			out int bombsAcquired, out int dynamitsAcquired, out int diamondsDestroyed)
 		{
 			var explosingPositions = GetAllPointsToExplode(board, out bombsAcquired, out dynamitsAcquired);
-			//CalculateRawHealAndDamage(board, explosingPositions, out rawHeal, out rawDamage);
-			ExplodeOnce(explosingPositions, board, out rawHeal, out rawDamage);
+			ExplodeOnce(explosingPositions.ToArray(), board, out rawHeal, out rawDamage, out diamondsDestroyed);
 		}
 
 		/// <summary>
 		/// Находит все точки на линии, заданной начальной точкой и смещением, которые
 		/// подлежат уничтожению
 		/// </summary>
-		/// <param name="start"></param>
-		/// <param name="shift"></param>
-		/// <param name="board"></param>
 		/// <param name="bombsAcquired">Сюда добавляются приобретённые бомбы</param>
 		/// <param name="dynamitsAcquired">Сюда добавляются приобретённые динамиты</param>
-		/// <returns></returns>
-		private IList<Point> GetLinePointsToExplode(Point start, Point shift, SimpleBoard board,
+		private List<Point> GetLinePointsToExplode(Point start, Point shift, SimpleBoard board,
 			ref int bombsAcquired, ref int dynamitsAcquired)
 		{
 			var result = new List<Point>();
@@ -668,7 +596,7 @@ namespace GodsGameApi
 				var prevPoint = positions[i - 1];
 
 				if (IsExplosiveInLine(board.Cells[currPoint.X, currPoint.Y]) && 
-					board.Cells[currPoint.X, currPoint.Y] == board.Cells[prevPoint.X, prevPoint.Y])
+					board[currPoint] == board[prevPoint])
 				{
 					curr += 1;
 					if (curr == 3)
@@ -679,7 +607,7 @@ namespace GodsGameApi
 				else
 				{
 					dynamitsAcquired += (curr >= 5) ? 1 : 0;
-					bombsAcquired += (curr == 4) ? 1 : 0;
+					bombsAcquired += (curr == 4 || curr >= 6) ? 1 : 0;
 					curr = 1;
 				}
 			}
@@ -689,10 +617,8 @@ namespace GodsGameApi
 
 		/// <summary>
 		/// Находит позиции всех элементов, которые должны быть уничтожены по правилам игры.
-		/// Заоодно вычисляет количество приобретенной взрывчатки.
+		/// Заодно вычисляет количество приобретенной взрывчатки.
 		/// </summary>
-		/// <param name="board"></param>
-		/// <returns></returns>
 		private List<Point> GetAllPointsToExplode(SimpleBoard board, 
 			out int bombsAcquired, out int dynamitsAcquired)
 		{
@@ -704,38 +630,18 @@ namespace GodsGameApi
 			{
 				var start = new Point(x, 1);
 				var shift = new Point(0, 1);
-				result = result.Concat(GetLinePointsToExplode(start, shift, board, ref bombsAcquired, ref dynamitsAcquired)).ToList();
+				result.AddRange(GetLinePointsToExplode(start, shift, board, ref bombsAcquired, ref dynamitsAcquired));
 			}
 
 			for (int y = 1; y <= board.Height; ++y)
 			{
 				var start = new Point(1, y);
 				var shift = new Point(1, 0);
-				result = result.Concat(GetLinePointsToExplode(start, shift, board, ref bombsAcquired, ref dynamitsAcquired)).ToList();
+				result.AddRange(GetLinePointsToExplode(start, shift, board, ref bombsAcquired, ref dynamitsAcquired));
 			}
 
 			result = result.Distinct().ToList();
 			return result;
-		}
-
-		/// <summary>
-		/// Подсчитывает значения суммарного лечения и повреждения взрываемых элементов
-		/// </summary>
-		/// <param name="board"></param>
-		/// <param name="explosingPositions"></param>
-		/// <param name="rawHeal"></param>
-		/// <param name="rawDamage"></param>
-		private void CalculateRawHealAndDamage(SimpleBoard board, IEnumerable<Point> explosingPositions,
-			out double rawHeal, out double rawDamage)
-		{
-			rawHeal = 0;
-			rawDamage = 0;
-
-			foreach (var p in explosingPositions)
-			{
-				rawHeal += GetHeal(board.Cells[p.X, p.Y]);
-				rawDamage += GetDamage(board.Cells[p.X, p.Y]);
-			}
 		}
 	}
 }

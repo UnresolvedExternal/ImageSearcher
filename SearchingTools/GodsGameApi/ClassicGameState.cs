@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 namespace GodsGameApi
 {
-	[Serializable]
 	public class ClassicGameState: IEquatable<ClassicGameState>
 	{
 		public Player CurrentPlayer { get; set; }
@@ -17,7 +16,7 @@ namespace GodsGameApi
 
 		public SimpleBoard Board { get; set; }
 
-		public ClassicAI Ai { get; private set; }
+		public ClassicRules Rules { get; private set; }
 
 		public void SwapPlayers()
 		{
@@ -26,7 +25,7 @@ namespace GodsGameApi
 			AnotherPlayer = temp;
 		}
 
-		public ClassicGameState()
+		public ClassicGameState(int width, int height)
 		{
 			CurrentPlayer = new Player();
 			CurrentPlayer.Hp = new Hitpoints(100, 100);
@@ -35,7 +34,17 @@ namespace GodsGameApi
 			Player = CurrentPlayer;
 			Enemy = AnotherPlayer;
 
-			Ai = new ClassicAI(this);
+			Rules = new ClassicRules(width, height);
+		}
+
+		public ClassicGameState(SimpleBoard board):
+			this(board.Width, board.Height)
+		{
+			this.Board = board;
+		}
+
+		private ClassicGameState()
+		{
 		}
 
 		public ClassicGameState Clone()
@@ -44,7 +53,8 @@ namespace GodsGameApi
 				{
 					Player = this.Player.Clone(),
 					Enemy = this.Enemy.Clone(),
-					Board = this.Board.Clone()
+					Board = this.Board.Clone(),
+					Rules = new ClassicRules(this.Board.Width, this.Board.Height)
 				};
 
 			bool isPlayerIsCurrent = object.ReferenceEquals(this.CurrentPlayer, this.Player);

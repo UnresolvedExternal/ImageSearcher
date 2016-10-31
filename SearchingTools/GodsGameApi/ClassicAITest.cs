@@ -16,8 +16,9 @@ namespace GodsGameApi
 		public void Test(string board, ClassicMovement bestMovement, int recursionDepth)
 		{
 			var state = TestHelper.CreateState(board, 50, 50, 0, 0, 0, 0);
-			state.Ai.maxRecursionDepth = recursionDepth;
-			var movement = state.Ai.GetGoodMovement(state.Ai.maxRecursionDepth);
+			var Ai = new ClassicAI(state);
+			Ai.maxRecursionDepth = recursionDepth;
+			var movement = Ai.GetGoodMovement(Ai.maxRecursionDepth);
 
 			Assert.That(bestMovement, Is.EqualTo(movement));
 		}

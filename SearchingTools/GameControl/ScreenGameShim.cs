@@ -80,7 +80,8 @@ namespace GameControl
 				return false;
 			}
 
-			var movement = gameState.Ai.GetGoodMovement(3);
+			var Ai = new ClassicAI(gameState);
+			var movement = Ai.GetGoodMovement(3);
 			
 			MakeMovement(movement);
 			Logger.Log(movement);
@@ -132,8 +133,7 @@ namespace GameControl
 			cellHeight = GetMaxDistance(inBoardEntities.Keys, p => p.Y) / (BoardHeight - 1);
 
 			var simpleBoard = GetSimpleBoard(inBoardEntities);
-			var gameState = new ClassicGameState();
-			gameState.Board = simpleBoard;
+			var gameState = new ClassicGameState(simpleBoard);
 
 			// Hp...
 			var hps = templatesStorage.GetPositions("HpHeart", screen, true);
