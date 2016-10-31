@@ -75,6 +75,8 @@ namespace SearchingTools
 				lock (_locker)
 					task = _task;
 				task.Wait();
+				lock (_locker)
+					task = _task;
 				isCompleted = task.IsCompleted;
 			}
 		}
