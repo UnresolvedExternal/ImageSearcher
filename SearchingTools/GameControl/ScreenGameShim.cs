@@ -1,4 +1,7 @@
-﻿using System;
+// THIS FILE CONSISTS OF EXPERIMENTAL CODE AND MUST BE REWRITTEN COMPLETELY
+// P.S. But it works
+
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Diagnostics;
